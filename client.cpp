@@ -4,6 +4,7 @@
 #include <netinet/in.h>  // struct sockaddr_in
 
 #include <arpa/inet.h>   // inet_addr
+#include <unistd.h>
 
 int main() {
     int socket_fd;
@@ -26,18 +27,21 @@ int main() {
         std::cout << "CONNECT_CLIENT OK\n";
 
     char buf[1000];
-    ret = recv(socket_fd, &buf, 1000, 0);
-    if (ret < 0)
-        std::cout << "RECEIVE_CLIENT ERROR\n";
-    else
-        std::cout << "RECEIVE_CLIENT OK\n";
-    
-    std::cout << buf << std::endl;
+    // while (1) {
+        ret = recv(socket_fd, &buf, 1000, 0);
+        if (ret < 0)
+            std::cout << "RECEIVE_CLIENT ERROR\n";
+        else
+            std::cout << "RECEIVE_CLIENT OK\n";
+        std::cout << buf << std::endl;
+    // }
+    // close(socket_fd);
 
     while (1)
         ;
 }
 
 // cpp -c main.cpp && cpp -o server main.o && cpp -c client.cpp && cpp -o client client.o
+// cpp -c server.cpp && cpp -o server server.o && cpp -c client.cpp && cpp -o client client.o
 // lsof -i | grep server
 // rm *.o server client
