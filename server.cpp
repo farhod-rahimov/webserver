@@ -34,8 +34,8 @@ int main() {
     struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
     
-    const char * text = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html>\nPOKA\n</html>\n";
-    #define TEXT_LEN 61
+    const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
+    #define TEXT_LEN 79
     std::vector<int> client_fds;
     std::vector<int> responses;
     while (1) {
