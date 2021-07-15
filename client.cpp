@@ -27,18 +27,16 @@ int main() {
         std::cout << "CONNECT_CLIENT OK\n";
 
     char buf[1000];
-    // while (1) {
-        ret = recv(socket_fd, &buf, 1000, 0);
-        if (ret < 0)
-            std::cout << "RECEIVE_CLIENT ERROR\n";
-        else
-            std::cout << "RECEIVE_CLIENT OK\n";
-        std::cout << buf << std::endl;
-    // }
-    // close(socket_fd);
+    ret = recv(socket_fd, &buf, 1000, 0);
+    buf[ret] = '\0';
+    if (ret < 0)  std::cout << "RECEIVE_CLIENT ERROR\n"; else std::cout << "RECEIVE_CLIENT OK\n";
+    std::cout << buf << std::endl;
 
-    while (1)
-        ;
+    ret = send(socket_fd, "HELLO SERVER!", 14, 0);
+    if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+
+    // while (1)
+    //     ;
 }
 
 // cpp -c main.cpp && cpp -o server main.o && cpp -c client.cpp && cpp -o client client.o
