@@ -33,12 +33,13 @@ int main() {
 
     struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
+    
+    int fd, res, flags;
+    fd_set readfds, writefds;
+    int max_d = socket_fd;
     while (1) {
-        int fd, res, flags;
-        fd_set readfds, writefds;
-        int max_d = socket_fd;
         FD_ZERO(&readfds);
-        FD_ZERO(&writefds);
+        // FD_ZERO(&writefds);
         FD_SET(socket_fd, &readfds);
 
         for (size_t i = 0; i < client_fds.size(); i++) {
@@ -48,13 +49,14 @@ int main() {
             if (fd > max_d)
                 max_d = fd;
         }
-        res = select(max_d + 1, &readfds, &writefds, NULL, NULL);
-        if (res == -1) {
-            if (errno == EINTR) {
-                std::cout << "Signal came\n";
+        // res = select(max_d + 1, &readfds, &writefds, NULL, NULL);
+        res = select(max_d + 1, &readfds, NULL, NULL, NULL);
+        if (res < 1) {
+            if (errno != EINTR) {
+                std::cout << "Select returned error\n";
             }
             else {
-                std::cout << "Select returned error\n";
+                std::cout << "Signal came\n";
             }
             continue ;
         }
@@ -72,14 +74,15 @@ int main() {
             fd = client_fds[i];
             if (FD_ISSET(fd, &readfds)) {
                 std::cout << "CLIENT SENT SOMETHING\n";
+                client_fds.erase(client_fds.begin() + i);
                 close(fd);
                 continue ;
             }
-            if (FD_ISSET(fd, &writefds)) {
-                ret = send(fd, "HELLO!\n", 7, 0);
-                if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-                std::cout << fd << std::endl;
-            }
+            // if (FD_ISSET(fd, &writefds)) {
+            //     ret = send(fd, "HELLO!\n", 7, 0);
+            //     if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+            //     std::cout << fd << std::endl;
+            // }
         }
     }
 
