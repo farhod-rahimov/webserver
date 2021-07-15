@@ -28,67 +28,57 @@ int main() {
     
     ret = listen(socket_fd, 50);
     if (ret < 0) std::cout << "LISTEN ERROR\n"; else std::cout << "LISTEN OK\n";
-    int flags = fcntl(socket_fd, F_GETFL);
-    std::cout << "FCNTL "  << fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) << std::endl;
+
+    std::vector<int> client_fds;
 
     struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
     
-    const char * text = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html>\nPOKA\n</html>\n";
-    #define TEXT_LEN 61
-    std::vector<int> client_fds;
-    std::vector<int> responses;
+    int fd, res, flags;
+    fd_set readfds, writefds;
+    int max_d = socket_fd;
+    char buf[1000];
     while (1) {
-        int fd;
-        fd_set readfds, writefds;
-        int max_d = socket_fd;
-
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
         FD_SET(socket_fd, &readfds);
-        for (size_t i = 0; i < client_fds.size(); i++){
+
+        for (size_t i = 0; i < client_fds.size(); i++) {
             fd = client_fds[i];
             FD_SET(fd, &readfds);
-            if (responses[i] > 0)
-                FD_SET(fd, &writefds);
+            // FD_SET(fd, &writefds);
             if (fd > max_d)
                 max_d = fd;
         }
-
-        int res = select(max_d + 1, &readfds, &writefds, NULL, NULL);
+        res = select(max_d + 1, &readfds, &writefds, NULL, NULL);
         if (res < 1) {
-            if (errno == EINTR) {
-                std::cout << "ERROR in SELECT\n";
+            if (errno != EINTR) {
+                std::cout << "Select returned error\n";
             }
             else {
-                std::cout << "SIGNAL CAME\n";
+                std::cout << "Signal came\n";
             }
-            continue;
-        }
-        if (res == 0) {
-            std::cout << "TIME OUT\n";
+            continue ;
         }
         if (FD_ISSET(socket_fd, &readfds)) {
-            int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
-            if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
-            int flags = fcntl(accept_fd, F_GETFL);
-            std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, flags | O_NONBLOCK) << std::endl;
-            client_fds.push_back(accept_fd);
-            responses.push_back(TEXT_LEN);
+            fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
+            if (fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
+            flags = fcntl(socket_fd, F_GETFL);            
+            fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+            client_fds.push_back(fd);
+            FD_SET(fd, &writefds);
         }
         for (size_t i = 0; i < client_fds.size(); i++) {
             fd = client_fds[i];
-            char buf[100];
-            if (FD_ISSET(fd, &readfds) && (ret = recv(fd, &buf, 100, 0))) {
-                buf[ret] = '\0';
+            if (FD_ISSET(fd, &readfds) && (ret = recv(fd, &buf, 1000, 0))) {
                 std::cout << "CLIENT SENT SOMETHING\n";
-                std::cout << buf << std::endl;
+                buf[ret] = '\0'; std::cout << buf << std::endl;
+                FD_CLR(fd, &readfds);
             }
             if (FD_ISSET(fd, &writefds)) {
-                ret = send(fd, text, TEXT_LEN, 0);
+                ret = send(fd, "HELLO CLIENT!", 14, 0);
                 if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-                responses[i] -= ret;
-                std::cout << "RET " << ret << std::endl;
+                FD_CLR(fd, &writefds);
             }
         }
     }
