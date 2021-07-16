@@ -71,8 +71,7 @@ int main() {
         if (FD_ISSET(socket_fd, &readfds)) {
             int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
             if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
-            int flags = fcntl(accept_fd, F_GETFL);
-            std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, flags | O_NONBLOCK) << std::endl;
+            std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
             client_fds.push_back(accept_fd);
             responses.push_back(TEXT_LEN);
         }
