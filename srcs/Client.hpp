@@ -9,9 +9,9 @@ class Client {
 			Client();
 			virtual ~Client();
 
-			// Client(const Client & src);
+			Client(const Client & src);
 			
-			// Client & operator = (const Client & src);
+			Client & operator = (const Client & src);
 
 			// REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST
 			
@@ -58,7 +58,7 @@ class Client {
 
 
 	private:
-	
+
 			// REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST
 			
 			std::string _req_method;
