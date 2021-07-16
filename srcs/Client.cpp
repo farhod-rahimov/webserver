@@ -1,10 +1,6 @@
 #include "Client.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
 
 Client::Client() {
-    this->_request_num = 0;
-    this->_response_num = 0;
 };
 
 Client::~Client() {};
@@ -15,28 +11,129 @@ Client::Client(const Client & src) {
 		
 Client & Client::operator = (const Client & src) {
     if (this != &src) {
-        this->_request = src._request;
-        this->_request_num = src._request_num;
-        this->_response = src._response;
-        this->_response_num = src._response_num;
     }
     return (*this);
 };
 
-void Client::setRequest(Request req) {
-    this->_request.insert(this->_request.end(), req);
-    this->_request_num = this->_request.size();
+        // REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST
+
+void Client::ReqSetMethod(std::string str) {
+    this->_req_method.clear();
+    this->_req_method = str;
 };
 
-void Client::setRequestNum(size_t num) {
-    this->_request_num = num;
+std::string & Client::ReqGetMethod(void) {
+    return (this->_req_method);
 };
 
-void Client::setResponse(Response resp) {
-    this->_response.insert(this->_response.end(), resp);
-    this->_response_num = this->_response.size();
+void Client::ReqSetPath(std::string str) {
+    this->_req_path.clear();
+    this->_req_path = str;
 };
 
-void Client::setResponseNum(size_t num) {
-    this->_response_num = num;
+std::string & Client::ReqGetPath(void) {
+    return (this->_req_path);
+};
+
+void Client::ReqSetProtocol(std::string str) {
+    this->_req_protocol.clear();
+    this->_req_protocol = str;
+};
+
+std::string & Client::ReqGetProtocol(void) {
+    return (this->_req_protocol);
+};
+
+void Client::ReqSetConnection(std::string str) {
+    this->_req_connection.clear();
+    this->_req_connection = str;
+};
+
+std::string & Client::ReqGetConnection(void) {
+    return (this->_req_connection);
+};
+
+void Client::ReqSetContentType(std::string str) {
+    this->_req_content_type.clear();
+    this->_req_content_type = str;
+};
+
+std::string & Client::ReqGetContentType(void) {
+    return (this->_req_content_type);
+};
+
+void Client::ReqSetContentLength(size_t n) {
+    this->_req_content_length = n;
+};
+
+size_t Client::ReqGetContentLength(void) {
+    return (this->_req_content_length);
+};
+
+
+void Client::ReqSetContent(std::string str) {
+    this->_req_content.clear();
+    this->_req_content = str;
+};
+
+std::string & Client::ReqGetContent(void) {
+    return (this->_req_content);
+};
+
+        // RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
+
+void Client::RespSetProtocol(std::string str) {
+    this->_resp_protocol.clear();
+    this->_resp_protocol = str;
+};
+
+std::string & Client::RespGetProtocol(void) {
+    return (this->_resp_protocol);
+};
+
+void Client::RespSetStatusCode(std::string str) {
+    this->_resp_status_code.clear();
+    this->_resp_status_code = str;
+};
+
+std::string & Client::RespGetStatusCode(void) {
+    return (this->_resp_status_code);
+};
+
+void Client::RespSetStatusText(std::string str) {
+    this->_resp_status_text.clear();
+    this->_resp_status_text = str;
+};
+
+std::string & Client::RespGetStatusText(void) {
+    return (this->_resp_status_text);
+};
+
+void Client::RespSetContentType(std::string str) {
+    this->_req_content_type.clear();
+    this->_req_content_type = "Content-Type: ";
+    this->_req_content_type.append(str);
+};
+
+std::string & Client::RespGetContentType(void) {
+    return (this->_req_content_type);
+};
+
+void Client::RespSetContentLength(std::string str) {
+    this->_resp_content_length.clear();
+    this->_resp_content_length = "Content-Length: ";
+    this->_resp_content_length.append(str);
+};
+
+std::string & Client::RespGetContentLength(void) {
+    return (this->_resp_content_length);
+};
+
+void Client::RespSetContent(std::string str) {
+    this->_resp_content.clear();
+    this->_resp_content = str;
+};
+
+std::string & Client::RespGetContent(void) {
+    return (this->_resp_content);
 };
