@@ -14,7 +14,7 @@
 int main() {
     int socket_fd = socket(PF_INET, SOCK_STREAM, 0);
     int ret;
-    if (socket_fd < 0) std::cout << "SOCKET ERROR\n"; else std::cout << "SOCKET OK\n";
+    // if (socket_fd < 0) std::cout << "SOCKET ERROR\n"; else std::cout << "SOCKET OK\n";
 
     struct sockaddr_in addr;
     addr.sin_family = PF_INET;
@@ -24,12 +24,13 @@ int main() {
     int opt = 1;
     setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     ret = bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
-    if (ret < 0) std::cout << "BIND ERROR\n"; else std::cout << "BIND OK\n";
+    // if (ret < 0) std::cout << "BIND ERROR\n"; else std::cout << "BIND OK\n";
     
     ret = listen(socket_fd, 50);
-    if (ret < 0) std::cout << "LISTEN ERROR\n"; else std::cout << "LISTEN OK\n";
+    // if (ret < 0) std::cout << "LISTEN ERROR\n"; else std::cout << "LISTEN OK\n";
     int flags = fcntl(socket_fd, F_GETFL);
-    std::cout << "FCNTL "  << fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) << std::endl;
+    // std::cout << "FCNTL "  << fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) << std::endl;
+    fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
 
     struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
@@ -70,8 +71,8 @@ int main() {
         }
         if (FD_ISSET(socket_fd, &readfds)) {
             int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
-            if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
-            std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
+            // if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
+            // std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
             client_fds.push_back(accept_fd);
             responses.push_back(TEXT_LEN);
         }
@@ -80,14 +81,15 @@ int main() {
             char buf[100];
             if (FD_ISSET(fd, &readfds) && (ret = recv(fd, &buf, 100, 0))) {
                 buf[ret] = '\0';
-                std::cout << "CLIENT SENT SOMETHING\n";
-                std::cout << buf << std::endl;
+                // std::cout << "CLIENT SENT SOMETHING\n";
+                // std::cout << buf << std::endl;
+                std::cout << buf;
             }
             if (FD_ISSET(fd, &writefds)) {
                 ret = send(fd, text, TEXT_LEN, 0);
-                if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+                // if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
                 responses[i] -= ret;
-                std::cout << "RET " << ret << std::endl;
+                // std::cout << "RET " << ret << std::endl;
             }
         }
     }
