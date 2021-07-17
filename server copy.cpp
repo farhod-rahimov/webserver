@@ -11,41 +11,27 @@
 #include <unistd.h>
 
 
-int ft_socket_init(void) {
-    struct sockaddr_in addr;
-    int socket_fd;
-    
-    if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-        std::cout << "SOCKET ERROR\n"; 
-    // else std::cout << "SOCKET OK\n";
+int main() {
+    int socket_fd = socket(PF_INET, SOCK_STREAM, 0);
+    int ret;
+    // if (socket_fd < 0) std::cout << "SOCKET ERROR\n"; else std::cout << "SOCKET OK\n";
 
+    struct sockaddr_in addr;
     addr.sin_family = PF_INET;
     addr.sin_port = htons(50001);
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     int opt = 1;
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-        std::cout << "SET_SOCK_OPT ERROR";
+    setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    ret = bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
+    // if (ret < 0) std::cout << "BIND ERROR\n"; else std::cout << "BIND OK\n";
     
-    if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-        std::cout << "BIND ERROR\n";
-    // else std::cout << "BIND OK\n";
-    
-    if (listen(socket_fd, 50) < 0)
-        std::cout << "LISTEN ERROR\n";
-    // else std::cout << "LISTEN OK\n";
+    ret = listen(socket_fd, 50);
+    // if (ret < 0) std::cout << "LISTEN ERROR\n"; else std::cout << "LISTEN OK\n";
+    int flags = fcntl(socket_fd, F_GETFL);
+    // std::cout << "FCNTL "  << fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) << std::endl;
+    fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
 
-    if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0)
-        std::cout << "FCNTL ERROR\n";
-    // else std::cout << "FCNTL OK\n";
-    
-    return (socket_fd);
-}
-
-int main() {
-
-    int ret;
-    int socket_fd = ft_socket_init();
     struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
     
