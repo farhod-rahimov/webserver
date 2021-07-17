@@ -26,14 +26,15 @@ int main() {
     else
         std::cout << "CONNECT_CLIENT OK\n";
 
+    ret = send(socket_fd, "HELLO SERVER!\n", 14, 0);
+    if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+    
     char buf[1000];
     ret = recv(socket_fd, &buf, 1000, 0);
     buf[ret] = '\0';
     if (ret < 0)  std::cout << "RECEIVE_CLIENT ERROR\n"; else std::cout << "RECEIVE_CLIENT OK\n";
     std::cout << buf << std::endl;
 
-    ret = send(socket_fd, "HELLO SERVER!", 14, 0);
-    if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
 
     // while (1)
     //     ;

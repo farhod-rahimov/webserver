@@ -57,8 +57,6 @@ void fd_set_reset(fd_set & readfds, fd_set & writefds, int & max_d, \
 	}
 }
 
-#define TEXT "<html>\nPOKA\n</html>"
-
 void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd) {
 	sockaddr_in client_addr;
 	socklen_t   client_addr_size;
@@ -72,10 +70,10 @@ void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd) {
 		std::cout << "FCNTL (ft_connection_accept) ERROR\n";
 	else std::cout << "FCNTL (ft_connection_accept) OK\n";
 	
-	// clients.erase(accept_fd);
+	clients.erase(accept_fd);
 	clients[accept_fd];
 
-	ft_create_response(clients, accept_fd);
+	ft_create_response(clients, accept_fd);  // zdes
 }
 
 void ft_create_response(std::map<int, Client> & clients, int fd) {
@@ -83,8 +81,8 @@ void ft_create_response(std::map<int, Client> & clients, int fd) {
 	clients[fd].RespSetStatusCode("200");
 	clients[fd].RespSetStatusTxt("OK");
 	clients[fd].RespSetContentType("text/html");
-	clients[fd].RespSetContentLength(strlen(static_cast<const char *>(TEXT)));
-	clients[fd].RespSetContent(TEXT);
+	clients[fd].RespSetContentLength(strlen(static_cast<const char *>("<html>\nPOKA\n</html>")));
+	clients[fd].RespSetContent("<html>\nPOKA\n</html>");
 	
 	clients[fd].RespCreateFullRespTxt();
 }
@@ -104,7 +102,8 @@ void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set 
 			// ft_parse_request(clients, it->first, buffer);
 			// ft_create_response(clients, it->first);
 			std::cout << it->second.getBuff();
-			std::cout << "КОНЕЦ ЗАПРОСА \n";
+			std::cout << "КОНЕЦ ЗАПРОСА " << it->first << "\n";
+			// ft_create_response(clients, it->first);                         //zdes
 			it->second.getBuff().clear();
 		}
 		if (FD_ISSET(it->first, &writefds)) {
