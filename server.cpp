@@ -1,5 +1,4 @@
 #include "Header.hpp"
-// #define TEXT_LEN 79
 #define BUFFER_SIZE 200
 
 typedef struct sockaddr_in sockaddr_in;
@@ -91,31 +90,27 @@ void ft_create_response(std::map<int, Client> & clients, int fd) {
 }
 
 void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set & writefds) {
-	char buffer[BUFFER_SIZE + 1];
+	static char tmp_buff[BUFFER_SIZE + 1];
+	static char buffer[BUFFER_SIZE + 1];
 	std::string tmp;
 	int sent_bytes;
 	int ret;
 
 	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
-		if (FD_ISSET(it->first, &readfds) && (ret = recv(it->first, &buffer, BUFFER_SIZE, 0))) {
-			buffer[ret] = '\0';
-			// std::cout << "CLIENT SENT SOMETHING\n";
-			std::cout << buffer << std::endl;
-			// std::cout << "\nret = " << ret << "\n";
+		if (FD_ISSET(it->first, &readfds) && (ret = recv(it->first, &tmp_buff, BUFFER_SIZE, 0))) {
+			tmp_buff[ret] = '\0';
+			strcpy(buffer, tmp_buff);
+			std::cout << buffer;
 		}
 		if (ret == 0 && strlen(buffer)) {
 			// ft_parse_request(clients, it->first, buffer);
-			// clients.find(it->first)->second.RespSetContent(TEXT);
-			// clients.find(it->first)->second.RespSetContentLength(strlen((static_cast<const char *>(TEXT))));
 			// ft_create_response(clients, it->first);
-			
-			buffer[0] = '\0';
+			std::cout << "КОНЕЦ ЗАПРОСА \n";
+			bzero(buffer, BUFFER_SIZE + 1);
 		}
 		if (FD_ISSET(it->first, &writefds)) {
-			// ft_create_response(clients, it->first);
-			tmp = clients[it->first].RespCreateFullRespTxt();
-			
-			sent_bytes = strlen(clients[it->first].RespCreateFullRespTxt().c_str()) - clients[it->first].RespGetRemainedToSent();
+			tmp = clients[it->first].RespGetFullRespTxt();
+			sent_bytes = strlen(clients[it->first].RespGetFullRespTxt().c_str()) - clients[it->first].RespGetRemainedToSent();
 			tmp.erase(0, sent_bytes);
 			ret = send(it->first, tmp.c_str(), BUFFER_SIZE, 0);
 			clients[it->first].RespSetRemainedToSent(clients[it->first].RespGetRemainedToSent() - ret);
@@ -126,7 +121,6 @@ void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set 
 int main() {
 	int         			socket_fd, max_d, res;
 	std::map<int, Client>	clients;
-    // const char *			text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
 	
 	fd_set					readfds, writefds;
 
