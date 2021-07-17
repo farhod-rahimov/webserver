@@ -91,7 +91,7 @@ void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set 
 	char tmp_buff[BUFFER_SIZE + 1];
 	std::string tmp;
 	int sent_bytes;
-	int ret;
+	int ret = 1;
 
 	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
 		if (FD_ISSET(it->first, &readfds) && (ret = recv(it->first, &tmp_buff, BUFFER_SIZE, 0))) {
