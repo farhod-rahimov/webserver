@@ -71,12 +71,15 @@ class Client {
 			int RespGetRemainedToSent(void);
 			void RespSetRemainedToSent(int);
 
+			// COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON
+			
+			std::string & getBuff(void);
 
 	private:
 
 			// COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON
 
-
+			std::string	_buff;
 
 			// REQUEST	|	REQUEST	|	REQUEST	|	REQUEST	|	REQUEST	|	REQUEST
 			

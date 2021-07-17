@@ -90,8 +90,7 @@ void ft_create_response(std::map<int, Client> & clients, int fd) {
 }
 
 void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set & writefds) {
-	static char tmp_buff[BUFFER_SIZE + 1];
-	static char buffer[BUFFER_SIZE + 1];
+	char tmp_buff[BUFFER_SIZE + 1];
 	std::string tmp;
 	int sent_bytes;
 	int ret;
@@ -99,14 +98,14 @@ void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set 
 	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
 		if (FD_ISSET(it->first, &readfds) && (ret = recv(it->first, &tmp_buff, BUFFER_SIZE, 0))) {
 			tmp_buff[ret] = '\0';
-			strcpy(buffer, tmp_buff);
-			std::cout << buffer;
+			it->second.getBuff().append(tmp_buff);
 		}
-		if (ret == 0 && strlen(buffer)) {
+		if (ret == 0 && it->second.getBuff().size()) {
 			// ft_parse_request(clients, it->first, buffer);
 			// ft_create_response(clients, it->first);
+			std::cout << it->second.getBuff();
 			std::cout << "КОНЕЦ ЗАПРОСА \n";
-			bzero(buffer, BUFFER_SIZE + 1);
+			it->second.getBuff().clear();
 		}
 		if (FD_ISSET(it->first, &writefds)) {
 			tmp = clients[it->first].RespGetFullRespTxt();

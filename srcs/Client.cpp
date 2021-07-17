@@ -196,3 +196,7 @@ int Client::RespGetRemainedToSent(void) {
 void Client::RespSetRemainedToSent(int len) {
     this->_resp_remained_to_sent = len;
 };
+
+std::string & Client::getBuff(void) {
+    return (this->_buff);
+}
