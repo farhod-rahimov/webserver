@@ -1,112 +1,154 @@
-#include <sys/socket.h>  // socket
-#include <sys/types.h>   // connect
-#include <iostream>
-#include <netinet/in.h>  // struct sockaddr_in
+#include "Header.hpp"
+// #define TEXT_LEN 79
+#define BUFFER_SIZE 200
 
-#include <arpa/inet.h>   // inet_addr
-#include <sys/select.h>  // select
-#include <fcntl.h>
+typedef struct sockaddr_in sockaddr_in;
+int ft_socket_init(int opt);
+void fd_set_reset(fd_set & readfds, fd_set & writefds, int & max_d, \
+					int & scoket_fd, std::map<int, Client> & clients);
+void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd);
+void ft_create_response(std::map<int, Client> & clients, int fd);
+void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set & writefds);
 
-#include <vector>
-#include <unistd.h>
+
+int ft_socket_init(int opt) {
+	int         socket_fd;
+	sockaddr_in addr;
+	
+	if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+		std::cout << "SOCKET ERROR\n"; 
+	else std::cout << "SOCKET OK\n";
+
+	addr.sin_family = PF_INET;
+	addr.sin_port = htons(50001);
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+		std::cout << "SET_SOCK_OPT ERROR";
+	
+	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+		std::cout << "BIND ERROR\n";
+	else std::cout << "BIND OK\n";
+	
+	if (listen(socket_fd, 50) < 0)
+		std::cout << "LISTEN ERROR\n";
+	else std::cout << "LISTEN OK\n";
+
+	if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0)
+		std::cout << "FCNTL (ft_socket_init) ERROR\n";
+	else std::cout << "FCNTL (ft_socket_init) OK\n";
+	
+	return (socket_fd);
+}
 
 
-int ft_socket_init(void) {
-    struct sockaddr_in addr;
-    int socket_fd;
-    
-    if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-        std::cout << "SOCKET ERROR\n"; 
-    // else std::cout << "SOCKET OK\n";
+void fd_set_reset(fd_set & readfds, fd_set & writefds, int & max_d, \
+					int & scoket_fd, std::map<int, Client> & clients) {
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
+	FD_SET(scoket_fd, &readfds);
 
-    addr.sin_family = PF_INET;
-    addr.sin_port = htons(50001);
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
+		FD_SET(it->first, &readfds);									// it->first is client_fd;
+		if (it->second.RespGetRemainedToSent() > 0) {
+			FD_SET(it->first, &writefds);
+		}
+		if (it->first > max_d)
+			max_d = it->first;
+	}
+}
 
-    int opt = 1;
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-        std::cout << "SET_SOCK_OPT ERROR";
-    
-    if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-        std::cout << "BIND ERROR\n";
-    // else std::cout << "BIND OK\n";
-    
-    if (listen(socket_fd, 50) < 0)
-        std::cout << "LISTEN ERROR\n";
-    // else std::cout << "LISTEN OK\n";
+#define TEXT "<html>\nPOKA\n</html>"
 
-    if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0)
-        std::cout << "FCNTL ERROR\n";
-    // else std::cout << "FCNTL OK\n";
-    
-    return (socket_fd);
+void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd) {
+	sockaddr_in client_addr;
+	socklen_t   client_addr_size;
+	int			accept_fd;
+
+	if ((accept_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &client_addr_size)) < 0)
+		std::cout << "ACCEPT ERROR\n";
+	else std::cout << "ACCEPT OK\n";
+	
+	if (fcntl(accept_fd, F_SETFL, O_NONBLOCK) < 0)
+		std::cout << "FCNTL (ft_connection_accept) ERROR\n";
+	else std::cout << "FCNTL (ft_connection_accept) OK\n";
+	
+	// clients.erase(accept_fd);
+	clients[accept_fd];
+
+	ft_create_response(clients, accept_fd);
+}
+
+void ft_create_response(std::map<int, Client> & clients, int fd) {
+	clients[fd].RespSetProtocol("HTTP/1.1");
+	clients[fd].RespSetStatusCode("200");
+	clients[fd].RespSetStatusTxt("OK");
+	clients[fd].RespSetContentType("text/html");
+	clients[fd].RespSetContentLength(strlen(static_cast<const char *>(TEXT)));
+	clients[fd].RespSetContent(TEXT);
+	
+	clients[fd].RespCreateFullRespTxt();
+}
+
+void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set & writefds) {
+	char buffer[BUFFER_SIZE + 1];
+	std::string tmp;
+	int sent_bytes;
+	int ret;
+
+	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
+		if (FD_ISSET(it->first, &readfds) && (ret = recv(it->first, &buffer, BUFFER_SIZE, 0))) {
+			buffer[ret] = '\0';
+			// std::cout << "CLIENT SENT SOMETHING\n";
+			std::cout << buffer << std::endl;
+			// std::cout << "\nret = " << ret << "\n";
+		}
+		if (ret == 0 && strlen(buffer)) {
+			// ft_parse_request(clients, it->first, buffer);
+			// clients.find(it->first)->second.RespSetContent(TEXT);
+			// clients.find(it->first)->second.RespSetContentLength(strlen((static_cast<const char *>(TEXT))));
+			// ft_create_response(clients, it->first);
+			
+			buffer[0] = '\0';
+		}
+		if (FD_ISSET(it->first, &writefds)) {
+			// ft_create_response(clients, it->first);
+			tmp = clients[it->first].RespCreateFullRespTxt();
+			
+			sent_bytes = strlen(clients[it->first].RespCreateFullRespTxt().c_str()) - clients[it->first].RespGetRemainedToSent();
+			tmp.erase(0, sent_bytes);
+			ret = send(it->first, tmp.c_str(), BUFFER_SIZE, 0);
+			clients[it->first].RespSetRemainedToSent(clients[it->first].RespGetRemainedToSent() - ret);
+		}
+	}
 }
 
 int main() {
+	int         			socket_fd, max_d, res;
+	std::map<int, Client>	clients;
+    // const char *			text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
+	
+	fd_set					readfds, writefds;
 
-    int ret;
-    int socket_fd = ft_socket_init();
-    struct sockaddr_in client;
-    socklen_t client_size = sizeof(client);
-    
-    const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
-    #define TEXT_LEN 79
-    std::vector<int> client_fds;
-    std::vector<int> responses;
-    while (1) {
-        int fd;
-        fd_set readfds, writefds;
-        int max_d = socket_fd;
-
-        FD_ZERO(&readfds);
-        FD_ZERO(&writefds);
-        FD_SET(socket_fd, &readfds);
-        for (size_t i = 0; i < client_fds.size(); i++){
-            fd = client_fds[i];
-            FD_SET(fd, &readfds);
-            if (responses[i] > 0)
-                FD_SET(fd, &writefds);
-            if (fd > max_d)
-                max_d = fd;
-        }
-
-        int res = select(max_d + 1, &readfds, &writefds, NULL, NULL);
-        if (res < 1) {
-            if (errno == EINTR) {
+	socket_fd = ft_socket_init(1);
+	while (1) {
+		max_d = socket_fd;
+		fd_set_reset(readfds, writefds, max_d, socket_fd, clients);
+		if ((res = select(max_d + 1, &readfds, &writefds, NULL, NULL)) < 1) {
+			if (errno == EINTR) {
                 std::cout << "ERROR in SELECT\n";
-            }
-            else {
-                std::cout << "SIGNAL CAME\n";
-            }
-            continue;
-        }
-        if (res == 0) {
-            std::cout << "TIME OUT\n";
-        }
-        if (FD_ISSET(socket_fd, &readfds)) {
-            int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
-            // if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
-            // std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
-            client_fds.push_back(accept_fd);
-            responses.push_back(TEXT_LEN);
-        }
-        for (size_t i = 0; i < client_fds.size(); i++) {
-            fd = client_fds[i];
-            char buf[100];
-            if (FD_ISSET(fd, &readfds) && (ret = recv(fd, &buf, 100, 0))) {
-                buf[ret] = '\0';
-                // std::cout << "CLIENT SENT SOMETHING\n";
-                // std::cout << buf << std::endl;
-                std::cout << buf;
-            }
-            if (FD_ISSET(fd, &writefds)) {
-                ret = send(fd, text, TEXT_LEN, 0);
-                // if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-                responses[i] -= ret;
-                // std::cout << "RET " << ret << std::endl;
-            }
-        }
-    }
-
-    return (0);
+			}
+			else if (res == 0) {
+                std::cout << "TIME OUT\n";
+			}
+			else {
+				std::cout << "SIGNAL CAME\n";
+			}
+		}
+		if (FD_ISSET(socket_fd, &readfds)) {
+			ft_connection_accept(clients, socket_fd);
+		}
+		ft_check_clients(clients, readfds, writefds);
+	}
+	return (0);
 }

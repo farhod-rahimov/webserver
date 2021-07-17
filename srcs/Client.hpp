@@ -36,6 +36,9 @@ class Client {
 			void ReqSetContent(std::string);
 			std::string & ReqGetContent(void);
 
+			void ReqSetReqNum(size_t);
+			size_t ReqGetReqNum(void);
+
 			// RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
 
 			void RespSetProtocol(std::string);
@@ -44,22 +47,38 @@ class Client {
 			void RespSetStatusCode(std::string);
 			std::string & RespGetStatusCode(void);
 			
-			void RespSetStatusText(std::string);
-			std::string & RespGetStatusText(void);
+			void RespSetStatusTxt(std::string);
+			std::string & RespGetStatusTxt(void);
 			
 			void RespSetContentType(std::string);
 			std::string & RespGetContentType(void);
 			
-			void RespSetContentLength(std::string);
+			// void RespSetContentLength(size_t);
+			// size_t RespGetContentLength(void);
+
+			void RespSetContentLength(size_t);
 			std::string & RespGetContentLength(void);
 			
 			void RespSetContent(std::string);
 			std::string & RespGetContent(void);
 
+			void RespSetRespNum(size_t);
+			size_t RespGetRespNum(void);
+
+			std::string & RespCreateFullRespTxt(void);
+			std::string & RespGetFullRespTxt(void);
+			
+			int RespGetRemainedToSent(void);
+			void RespSetRemainedToSent(int);
+
 
 	private:
 
-			// REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST | REQUEST
+			// COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON
+
+
+
+			// REQUEST	|	REQUEST	|	REQUEST	|	REQUEST	|	REQUEST	|	REQUEST
 			
 			std::string _req_method;
 			
@@ -70,16 +89,25 @@ class Client {
 			std::string _req_content_type;
 			size_t		_req_content_length;
 			std::string _req_content;
+
+			size_t		_req_num;
 			
-			// RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
+			// RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE
 
 			std::string _resp_protocol;
 			std::string _resp_status_code;
-			std::string _resp_status_text;
+			std::string _resp_status_txt;
 			
 			std::string _resp_content_type;
-			std::string _resp_content_length;
+			// size_t		_resp_content_length;
+			std::string	_resp_content_length;
 			std::string _resp_content;
+
+			std::string _resp_full_resp_txt;
+			// int			_resp_full_resp_length;
+			int			_resp_remained_to_sent;
+			
+			size_t		_resp_num;
 };
 
 // std::string & operator << (std::string & full_response, Response & response) {

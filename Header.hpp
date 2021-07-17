@@ -1,5 +1,5 @@
-#ifndef HEADERS_HPP
-# define HEADERS_HPP
+#ifndef HEADER_HPP
+# define HEADER_HPP
 
 #include <sys/socket.h>  // socket
 #include <sys/types.h>   // connect
@@ -11,11 +11,9 @@
 #include <fcntl.h>
 
 #include <vector>
+#include <map>
 #include <unistd.h>
 
 #include "./srcs/Client.hpp"
-#include "./srcs/Response.hpp"
-#include "./srcs/Request.hpp"
-
 
 #endif
