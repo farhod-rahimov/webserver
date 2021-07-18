@@ -4,7 +4,8 @@
 typedef struct sockaddr_in sockaddr_in;
 int		ft_socket_init(int opt);
 int		kqueue_init(std::vector<struct kevent> & chlist, int socket_fd);
-void	ft_check_evlist_error(std::vector<struct kevent> & evlist);
+bool	ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
+
 
 bool	ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
 								std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
@@ -27,7 +28,7 @@ int ft_socket_init(int opt) {
 	else std::cout << "SOCKET OK\n";
 
 	addr.sin_family = PF_INET;
-	addr.sin_port = htons(50001);
+	addr.sin_port = htons(50002);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
@@ -59,11 +60,23 @@ int kqueue_init(std::vector<struct kevent> & chlist, int socket_fd) {
 	return (kq);
 }
 
-void ft_check_evlist_error(std::vector<struct kevent> & evlist) {
+bool ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist) {
+	size_t i;
+
 	if (evlist[0].flags & EV_EOF) {
-		std::cout << "Read direction of socket has shutdown\n";
-		exit(EXIT_FAILURE);
+		for (i = 0; i < chlist.size(); i++) {
+			if (chlist[i].ident == evlist[0].ident)
+				break ;
+		}
+		close(chlist[i].ident);
+		chlist.erase(chlist.begin() + i);
+		evlist.erase(chlist.begin() + i);
+
+		std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
+		return (true);
+		// exit(EXIT_FAILURE);
 	}
+	return (false);
 }
 
 bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
@@ -76,9 +89,11 @@ bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<stru
 		if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
 		std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
 
+		std::cout <<  "  cakdmclkadmclkdamclkdmclkJMLKM!!!!!!!!!!!!!!!!!" <<  chlist.size() << std::endl;
+		
 		struct kevent tmp;
-		EV_SET(&tmp, accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		chlist.push_back(tmp);
+		EV_SET(&chlist.back(), accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		evlist.reserve(chlist.size());
 		
 		clients[accept_fd];
@@ -116,6 +131,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			}
 			buf[ret] = '\0';
 			std::cout << buf;
+		std::cout <<  "  cakdmclkadmclkdamclkdmclkJMLKM!!!!!!!!!!!!!!!!! RECV " <<  evlist[i].ident << std::endl;
 
 			ft_create_response(clients, evlist[i].ident);
 		}
@@ -171,7 +187,9 @@ int main() {
         }
         else if (nev > 0) {
 			std::cout << nev << " kevent OK\n";
-			ft_check_evlist_error(evlist);
+			if (ft_check_evlist_error(chlist, evlist)) {
+				continue ;
+			}
 			ft_check_fds(nev, socket_fd, chlist, evlist, clients);
         }
 	}
