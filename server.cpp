@@ -1,5 +1,5 @@
 #include "Header.hpp"
-#define BUFFER_SIZE 200
+#define BUFFER_SIZE 1024
 
 typedef struct sockaddr_in sockaddr_in;
 int ft_socket_init(int opt);
@@ -40,107 +40,85 @@ int ft_socket_init(int opt) {
 	return (socket_fd);
 }
 
+int kqueue_init(std::vector<struct kevent> & chlist, int socket_fd) {
+	int kq;
 
-void fd_set_reset(fd_set & readfds, fd_set & writefds, int & max_d, \
-					int & scoket_fd, std::map<int, Client> & clients) {
-	FD_ZERO(&readfds);
-	FD_ZERO(&writefds);
-	FD_SET(scoket_fd, &readfds);
+	if ((kq = kqueue()) == -1)
+		std::cout << "KQUEUE ERROR\n";
+	else std::cout << "KQUEUE OK\n";
 
-	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
-		FD_SET(it->first, &readfds);									// it->first is client_fd;
-		if (it->second.RespGetRemainedToSent() > 0) {
-			FD_SET(it->first, &writefds);
-		}
-		if (it->first > max_d)
-			max_d = it->first;
-	}
-}
-
-void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd) {
-	sockaddr_in client_addr;
-	socklen_t   client_addr_size;
-	int			accept_fd;
-
-	if ((accept_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &client_addr_size)) < 0)
-		std::cout << "ACCEPT ERROR\n";
-	else std::cout << "ACCEPT OK\n";
-	
-	if (fcntl(accept_fd, F_SETFL, O_NONBLOCK) < 0)
-		std::cout << "FCNTL (ft_connection_accept) ERROR\n";
-	else std::cout << "FCNTL (ft_connection_accept) OK\n";
-	
-	clients.erase(accept_fd);
-	clients[accept_fd];
-
-	ft_create_response(clients, accept_fd);  // zdes
-}
-
-void ft_create_response(std::map<int, Client> & clients, int fd) {
-	clients[fd].RespSetProtocol("HTTP/1.1");
-	clients[fd].RespSetStatusCode("200");
-	clients[fd].RespSetStatusTxt("OK");
-	clients[fd].RespSetContentType("text/html");
-	clients[fd].RespSetContentLength(strlen(static_cast<const char *>("<html>\nPOKA\n</html>")));
-	clients[fd].RespSetContent("<html>\nPOKA\n</html>");
-	
-	clients[fd].RespCreateFullRespTxt();
-}
-
-void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set & writefds) {
-	char tmp_buff[BUFFER_SIZE + 1];
-	std::string tmp;
-	int sent_bytes;
-	int ret = 1;
-
-	for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++) {
-		if (FD_ISSET(it->first, &readfds) && (ret = recv(it->first, &tmp_buff, BUFFER_SIZE, 0))) {
-			tmp_buff[ret] = '\0';
-			it->second.getBuff().append(tmp_buff);
-		}
-		if (ret == 0 && it->second.getBuff().size()) {
-			// ft_parse_request(clients, it->first, buffer);
-			// ft_create_response(clients, it->first);
-			std::cout << it->second.getBuff();
-			std::cout << "КОНЕЦ ЗАПРОСА " << it->first << "\n";
-			// ft_create_response(clients, it->first);                         //zdes
-			it->second.getBuff().clear();
-		}
-		if (FD_ISSET(it->first, &writefds)) {
-			tmp = clients[it->first].RespGetFullRespTxt();
-			sent_bytes = strlen(clients[it->first].RespGetFullRespTxt().c_str()) - clients[it->first].RespGetRemainedToSent();
-			tmp.erase(0, sent_bytes);
-			ret = send(it->first, tmp.c_str(), BUFFER_SIZE, 0);
-			clients[it->first].RespSetRemainedToSent(clients[it->first].RespGetRemainedToSent() - ret);
-		}
-	}
+    EV_SET(&chlist[0], socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+	return (kq);
 }
 
 int main() {
-	int         			socket_fd, max_d, res;
+	int         			kq, nev;
+	unsigned int			socket_fd;
 	std::map<int, Client>	clients;
-	
-	fd_set					readfds, writefds;
 
+	std::vector<struct kevent> chlist(1);
+	std::vector<struct kevent> evlist(1);
+	
+    struct sockaddr_in client;
+    socklen_t client_size = sizeof(client);
+
+	char buf[BUFFER_SIZE];
+	
 	socket_fd = ft_socket_init(1);
+	kq = kqueue_init(chlist, socket_fd);
+
+	const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
+    #define TEXT_LEN 79
 	while (1) {
-		max_d = socket_fd;
-		fd_set_reset(readfds, writefds, max_d, socket_fd, clients);
-		if ((res = select(max_d + 1, &readfds, &writefds, NULL, NULL)) < 1) {
-			if (errno == EINTR) {
-                std::cout << "ERROR in SELECT\n";
-			}
-			else if (res == 0) {
-                std::cout << "TIME OUT\n";
-			}
-			else {
-				std::cout << "SIGNAL CAME\n";
-			}
-		}
-		if (FD_ISSET(socket_fd, &readfds)) {
-			ft_connection_accept(clients, socket_fd);
-		}
-		ft_check_clients(clients, readfds, writefds);
+		nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
+        
+		if (nev < 0) {
+            std::cout << "kevent ERROR\n";
+            exit(EXIT_FAILURE);
+        }
+        
+        else if (nev > 0) {
+            std::cout << nev << " kevent OK\n";
+            if (evlist[0].flags & EV_EOF) {
+                std::cout << "Read direction of socket has shutdown\n";
+                exit(EXIT_FAILURE);
+            }
+
+            for (int i = 0; i < nev; i++) {
+                if (evlist[i].flags & EV_ERROR) {
+                    /* Report errors */
+                    std::cout << "EV_ERROR\n";
+                    exit(EXIT_FAILURE);
+                }
+                if (evlist[i].ident == socket_fd) {
+                    int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
+                    if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
+                    std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
+
+                    struct kevent tmp;
+                    EV_SET(&tmp, accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+                    chlist.push_back(tmp);
+                    evlist.reserve(chlist.size());
+                    continue;
+                }
+                if (evlist[i].filter & EVFILT_READ) {
+                     /* We have data from the client */
+                        int ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
+                        if (ret < 0) {
+                            std::cout << "recv ERROR";
+                            exit(1);
+                        }
+                        buf[ret] = '\0';
+                        std::cout << buf;
+                    }
+                if (evlist[i].filter & EVFILT_WRITE) {
+                    // if (у нас что-то есть для отправки)
+                        int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
+                        if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+                }
+            }
+        }
+
 	}
 	return (0);
 }

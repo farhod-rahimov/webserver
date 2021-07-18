@@ -14,6 +14,10 @@
 #include <map>
 #include <unistd.h>
 
+#include <sys/types.h>    //kevent
+#include <sys/event.h>
+#include <sys/time.h>
+
 #include "./srcs/Client.hpp"
 
 #endif
