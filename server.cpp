@@ -118,20 +118,20 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			std::cout << buf;
 
 			ft_create_response(clients, evlist[i].ident);
-    		// EV_SET(&chlist[evlist[i].ident], evlist[i].ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
 		}
 	if (evlist[i].filter & EVFILT_WRITE) {
 		if (clients[evlist[i].ident].RespGetRemainedToSent() > 0) {
 			std::string tmp = clients[evlist[i].ident].RespGetFullRespTxt();
 			size_t sent_bytes = strlen(clients[evlist[i].ident].RespGetFullRespTxt().c_str()) - clients[evlist[i].ident].RespGetRemainedToSent();
 			tmp.erase(0, sent_bytes);
-			ret = send(evlist[i].ident, tmp.c_str(), BUFFER_SIZE, 0);
+			
+			if (strlen(tmp.c_str()) > BUFFER_SIZE)
+				ret = send(evlist[i].ident, tmp.c_str(), BUFFER_SIZE, 0);
+			else
+				ret = send(evlist[i].ident, tmp.c_str(), strlen(tmp.c_str()), 0);
 			if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
 			clients[evlist[i].ident].RespSetRemainedToSent(clients[evlist[i].ident].RespGetRemainedToSent() - ret);
-
-    		// EV_SET(&chlist[evlist[i].ident], evlist[i].ident, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, 0);
 		}
-
 		// int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
 		// 	if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
 	}
