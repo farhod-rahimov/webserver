@@ -2,13 +2,20 @@
 #define BUFFER_SIZE 1024
 
 typedef struct sockaddr_in sockaddr_in;
-int ft_socket_init(int opt);
-void fd_set_reset(fd_set & readfds, fd_set & writefds, int & max_d, \
-					int & scoket_fd, std::map<int, Client> & clients);
-void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd);
-void ft_create_response(std::map<int, Client> & clients, int fd);
-void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
+int		ft_socket_init(int opt);
+int		kqueue_init(std::vector<struct kevent> & chlist, int socket_fd);
+void	ft_check_evlist_error(std::vector<struct kevent> & evlist);
 
+bool	ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
+								std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
+
+void	ft_create_response(std::map<int, Client> & clients, int fd);
+
+void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
+						std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
+
+void	ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \
+					std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
 
 
 int ft_socket_init(int opt) {
@@ -52,7 +59,15 @@ int kqueue_init(std::vector<struct kevent> & chlist, int socket_fd) {
 	return (kq);
 }
 
-bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist) {
+void ft_check_evlist_error(std::vector<struct kevent> & evlist) {
+	if (evlist[0].flags & EV_EOF) {
+		std::cout << "Read direction of socket has shutdown\n";
+		exit(EXIT_FAILURE);
+	}
+}
+
+bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
+								std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
 	struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
 	
@@ -65,52 +80,77 @@ bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<stru
 		EV_SET(&tmp, accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		chlist.push_back(tmp);
 		evlist.reserve(chlist.size());
+		
+		clients[accept_fd];
 		return (true);
 	}
 	return (false);
 }
 
-void ft_check_clients(int & i, std::vector<struct kevent> & evlist) {
+void ft_create_response(std::map<int, Client> & clients, int fd) {
+	clients[fd].RespSetProtocol("HTTP/1.1");
+	clients[fd].RespSetStatusCode("200");
+	clients[fd].RespSetStatusTxt("OK");
+	clients[fd].RespSetContentType("text/html");
+	clients[fd].RespSetContentLength(strlen(static_cast<const char *>("<html>\nPOKA\n</html>")));
+	clients[fd].RespSetContent("<html>\nPOKA\n</html>");
+	
+	clients[fd].RespCreateFullRespTxt();
+}
+
+const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
+
+void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
 	char buf[BUFFER_SIZE];
-	const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
     #define TEXT_LEN 79
+	int ret;
+
+	(void)chlist;
 	
 	if (evlist[i].filter & EVFILT_READ) {
 			/* We have data from the client */
-			int ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
+			ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
 			if (ret < 0) {
 				std::cout << "recv ERROR";
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			buf[ret] = '\0';
 			std::cout << buf;
+
+			ft_create_response(clients, evlist[i].ident);
+    		// EV_SET(&chlist[evlist[i].ident], evlist[i].ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
 		}
 	if (evlist[i].filter & EVFILT_WRITE) {
-		// if (у нас что-то есть для отправки)
-			int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
+		if (clients[evlist[i].ident].RespGetRemainedToSent() > 0) {
+			std::string tmp = clients[evlist[i].ident].RespGetFullRespTxt();
+			size_t sent_bytes = strlen(clients[evlist[i].ident].RespGetFullRespTxt().c_str()) - clients[evlist[i].ident].RespGetRemainedToSent();
+			tmp.erase(0, sent_bytes);
+			ret = send(evlist[i].ident, tmp.c_str(), BUFFER_SIZE, 0);
 			if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+			clients[evlist[i].ident].RespSetRemainedToSent(clients[evlist[i].ident].RespGetRemainedToSent() - ret);
+
+    		// EV_SET(&chlist[evlist[i].ident], evlist[i].ident, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, 0);
+		}
+
+		// int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
+		// 	if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
 	}
 }
 
-void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist) {
+void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \
+					std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
 	for (int i = 0; i < nev; i++) {
 		if (evlist[i].flags & EV_ERROR) { /* Report errors */
 			std::cout << "EV_ERROR\n";
 			exit(EXIT_FAILURE);
 		}
-		if (ft_check_new_connection(socket_fd, i, chlist, evlist) == true) {
+		if (ft_check_new_connection(socket_fd, i, chlist, evlist, clients) == true) {
 			continue ;
 		}
-		ft_check_clients(i, evlist);
+		ft_check_clients(i, chlist, evlist, clients);
 	}
 };
 
-void ft_check_evlist_error(std::vector<struct kevent> & evlist) {
-	if (evlist[0].flags & EV_EOF) {
-		std::cout << "Read direction of socket has shutdown\n";
-		exit(EXIT_FAILURE);
-	}
-}
 
 int main() {
 	int         			kq, nev;
@@ -132,9 +172,8 @@ int main() {
         else if (nev > 0) {
 			std::cout << nev << " kevent OK\n";
 			ft_check_evlist_error(evlist);
-			ft_check_fds(nev, socket_fd, chlist, evlist);
+			ft_check_fds(nev, socket_fd, chlist, evlist, clients);
         }
-
 	}
 	return (0);
 }
