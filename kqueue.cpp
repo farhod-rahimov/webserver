@@ -58,8 +58,12 @@ int main() {
 
 #define BUFSIZE 1024
 
-struct kevent chlist[3];   /* events we want to monitor */
-struct kevent evlist[3];   /* events that were triggered */
+// struct kevent chlist[3];   /* events we want to monitor */
+// struct kevent evlist[3];   /* events that were triggered */
+
+std::vector<struct kevent> chlist(1);
+std::vector<struct kevent> evlist(1);
+
 char buf[BUFSIZE];
 
     struct sockaddr_in client;
@@ -79,7 +83,7 @@ char buf[BUFSIZE];
     
     
     while (1) {
-        nev = kevent(kq, chlist, n, evlist, n, NULL);
+        nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
  
         if (nev < 0) {
             std::cout << "kevent ERROR\n";
@@ -103,9 +107,11 @@ char buf[BUFSIZE];
                     int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
                     if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
                     std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
-                    
-                    EV_SET(&chlist[n], accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-                    n++;
+
+                    struct kevent tmp;
+                    EV_SET(&tmp, accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+                    chlist.push_back(tmp);
+                    evlist.reserve(chlist.size());
                     continue;
                 }
                 else {
