@@ -7,7 +7,8 @@ void fd_set_reset(fd_set & readfds, fd_set & writefds, int & max_d, \
 					int & scoket_fd, std::map<int, Client> & clients);
 void ft_connection_accept(std::map<int, Client> & clients, int & socket_fd);
 void ft_create_response(std::map<int, Client> & clients, int fd);
-void ft_check_clients(std::map<int, Client> & clients, fd_set & readfds, fd_set & writefds);
+void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
+
 
 
 int ft_socket_init(int opt) {
@@ -51,6 +52,66 @@ int kqueue_init(std::vector<struct kevent> & chlist, int socket_fd) {
 	return (kq);
 }
 
+bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist) {
+	struct sockaddr_in client;
+    socklen_t client_size = sizeof(client);
+	
+	if (evlist[i].ident == socket_fd) {
+		int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
+		if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
+		std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
+
+		struct kevent tmp;
+		EV_SET(&tmp, accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+		chlist.push_back(tmp);
+		evlist.reserve(chlist.size());
+		return (true);
+	}
+	return (false);
+}
+
+void ft_check_clients(int & i, std::vector<struct kevent> & evlist) {
+	char buf[BUFFER_SIZE];
+	const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
+    #define TEXT_LEN 79
+	
+	if (evlist[i].filter & EVFILT_READ) {
+			/* We have data from the client */
+			int ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
+			if (ret < 0) {
+				std::cout << "recv ERROR";
+				exit(1);
+			}
+			buf[ret] = '\0';
+			std::cout << buf;
+		}
+	if (evlist[i].filter & EVFILT_WRITE) {
+		// if (у нас что-то есть для отправки)
+			int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
+			if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+	}
+}
+
+void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist) {
+	for (int i = 0; i < nev; i++) {
+		if (evlist[i].flags & EV_ERROR) { /* Report errors */
+			std::cout << "EV_ERROR\n";
+			exit(EXIT_FAILURE);
+		}
+		if (ft_check_new_connection(socket_fd, i, chlist, evlist) == true) {
+			continue ;
+		}
+		ft_check_clients(i, evlist);
+	}
+};
+
+void ft_check_evlist_error(std::vector<struct kevent> & evlist) {
+	if (evlist[0].flags & EV_EOF) {
+		std::cout << "Read direction of socket has shutdown\n";
+		exit(EXIT_FAILURE);
+	}
+}
+
 int main() {
 	int         			kq, nev;
 	unsigned int			socket_fd;
@@ -59,64 +120,19 @@ int main() {
 	std::vector<struct kevent> chlist(1);
 	std::vector<struct kevent> evlist(1);
 	
-    struct sockaddr_in client;
-    socklen_t client_size = sizeof(client);
-
-	char buf[BUFFER_SIZE];
-	
 	socket_fd = ft_socket_init(1);
 	kq = kqueue_init(chlist, socket_fd);
 
-	const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
-    #define TEXT_LEN 79
 	while (1) {
 		nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
         
 		if (nev < 0) {
-            std::cout << "kevent ERROR\n";
-            exit(EXIT_FAILURE);
+            std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);
         }
-        
         else if (nev > 0) {
-            std::cout << nev << " kevent OK\n";
-            if (evlist[0].flags & EV_EOF) {
-                std::cout << "Read direction of socket has shutdown\n";
-                exit(EXIT_FAILURE);
-            }
-
-            for (int i = 0; i < nev; i++) {
-                if (evlist[i].flags & EV_ERROR) {
-                    /* Report errors */
-                    std::cout << "EV_ERROR\n";
-                    exit(EXIT_FAILURE);
-                }
-                if (evlist[i].ident == socket_fd) {
-                    int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
-                    if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
-                    std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
-
-                    struct kevent tmp;
-                    EV_SET(&tmp, accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-                    chlist.push_back(tmp);
-                    evlist.reserve(chlist.size());
-                    continue;
-                }
-                if (evlist[i].filter & EVFILT_READ) {
-                     /* We have data from the client */
-                        int ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
-                        if (ret < 0) {
-                            std::cout << "recv ERROR";
-                            exit(1);
-                        }
-                        buf[ret] = '\0';
-                        std::cout << buf;
-                    }
-                if (evlist[i].filter & EVFILT_WRITE) {
-                    // if (у нас что-то есть для отправки)
-                        int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
-                        if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-                }
-            }
+			std::cout << nev << " kevent OK\n";
+			ft_check_evlist_error(evlist);
+			ft_check_fds(nev, socket_fd, chlist, evlist);
         }
 
 	}
