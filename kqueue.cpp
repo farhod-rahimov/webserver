@@ -69,7 +69,7 @@ char buf[BUFSIZE];
     struct sockaddr_in client;
     socklen_t client_size = sizeof(client);
 
-    int kq, nev, n = 1;
+    int kq, nev;
 
     if ((kq = kqueue()) == -1)
 		std::cout << "KQUEUE ERROR\n";
@@ -103,7 +103,7 @@ char buf[BUFSIZE];
                     std::cout << "EV_ERROR\n";
                     exit(EXIT_FAILURE);
                 }
-                 if (evlist[i].ident == socket_fd) {
+                if (evlist[i].ident == socket_fd) {
                     int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
                     if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
                     std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
@@ -114,26 +114,21 @@ char buf[BUFSIZE];
                     evlist.reserve(chlist.size());
                     continue;
                 }
-                else {
+                if (evlist[i].filter & EVFILT_READ) {
                      /* We have data from the client */
-                    //  memset(buf, 0, BUFSIZE);
-                    //  if (read(chlist[i].ident, buf, BUFSIZE) < 0) {
-                    //     std::cout << "READ_ERROR\n";
-                    //     exit(EXIT_FAILURE);
-                    //  }
-
-                    int ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
-                    if (ret < 0) {
-                        std::cout << "recv ERROR";
-                        exit(1);
+                        int ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
+                        if (ret < 0) {
+                            std::cout << "recv ERROR";
+                            exit(1);
+                        }
+                        buf[ret] = '\0';
+                        std::cout << buf;
                     }
-                    buf[ret] = '\0';
-                    std::cout << buf;
-
-                    ret = send(evlist[i].ident, text, TEXT_LEN, 0);
-                    if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+                if (evlist[i].filter & EVFILT_WRITE) {
+                    // if (у нас что-то есть для отправки)
+                        int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
+                        if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
                 }
-
             }
         }
     }
