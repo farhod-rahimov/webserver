@@ -1,14 +1,29 @@
-SRCS =		./srcs/Client.cpp
+SRCS =			./srcs/Client.cpp \
+				./server.cpp
 
-SERVER =	./server.cpp
+OBJS =			$(SRCS:.cpp=.o)
 
-CLIENT = 	./client_test.cpp
+CC = 			clang++
 
-all: 
-		@ clang++ -Wall -Wextra -Werror -std=c++98 -c $(SERVER) $(SRCS) && \
-		clang++ -Wall -Wextra -Werror -std=c++98 -o server *.o && \
-		clang++ -Wall -Wextra -Werror -std=c++98 -c $(CLIENT) && \
-		clang++ -Wall -Wextra -Werror -std=c++98 -o client_test client_test.o
+FLAGS =			-Wall -Wextra -Werror -std=c++98
+
+NAME =			server
+
+%.o:			%.cpp
+				@ $(CC) -c $(FLAGS) $< -o $(<:.cpp=.o)
+
+all: 			$(NAME)
+
+$(NAME):		$(OBJS)
+				@ $(CC) -o $(NAME) $(OBJS) 
+				@ echo 'server built, run ./server'
 
 clean:
-		@ rm *.o server client_test
+				@ rm -f $(OBJS)
+
+fclean:			clean
+				@ rm -f $(NAME)
+
+re:				fclean all
+
+.PHONY:			all clean fclean re
