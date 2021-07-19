@@ -1,5 +1,5 @@
 #include "Header.hpp"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1000
 
 typedef struct sockaddr_in sockaddr_in;
 int		ft_socket_init(int opt);
@@ -89,8 +89,6 @@ bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<stru
 		if (accept_fd < 0) std::cout << "ACCEPT ERROR\n"; else std::cout << "ACCEPT OK\n";
 		std::cout << "FCNTL "  << fcntl(accept_fd, F_SETFL, O_NONBLOCK) << std::endl;
 
-		std::cout <<  "  cakdmclkadmclkdamclkdmclkJMLKM!!!!!!!!!!!!!!!!!" <<  chlist.size() << std::endl;
-		
 		struct kevent tmp;
 		chlist.push_back(tmp);
 		EV_SET(&chlist.back(), accept_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
@@ -116,41 +114,50 @@ void ft_create_response(std::map<int, Client> & clients, int fd) {
 const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
 
 void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
-	char buf[BUFFER_SIZE];
+	char buf[BUFFER_SIZE + 1];
     #define TEXT_LEN 79
 	int ret;
 
 	(void)chlist;
+	(void)clients;
 	
+    int fd = evlist[i].ident;
 	if (evlist[i].filter & EVFILT_READ) {
 			/* We have data from the client */
-			ret = recv(evlist[i].ident, &buf, BUFSIZ, 0);
+			ret = recv(fd, &buf, BUFFER_SIZE, 0);
 			if (ret < 0) {
 				std::cout << "recv ERROR";
 				exit(EXIT_FAILURE);
 			}
 			buf[ret] = '\0';
-			std::cout << buf;
-		std::cout <<  "  cakdmclkadmclkdamclkdmclkJMLKM!!!!!!!!!!!!!!!!! RECV " <<  evlist[i].ident << std::endl;
-
-			ft_create_response(clients, evlist[i].ident);
-		}
-	if (evlist[i].filter & EVFILT_WRITE) {
-		if (clients[evlist[i].ident].RespGetRemainedToSent() > 0) {
-			std::string tmp = clients[evlist[i].ident].RespGetFullRespTxt();
-			size_t sent_bytes = strlen(clients[evlist[i].ident].RespGetFullRespTxt().c_str()) - clients[evlist[i].ident].RespGetRemainedToSent();
-			tmp.erase(0, sent_bytes);
+            clients[fd].getBuff().append(buf);
+    }
+    if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
+        std::cout << clients[fd].getBuff() << std::endl << "-----------------------\n";
+        ft_create_response(clients, fd);
+        ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
+        // write(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent());
+        std::cout << "SENT\n" << clients[fd].RespGetFullRespTxt();
+        clients[fd].getBuff().clear();
+    }
+	// if (evlist[i].filter & EVFILT_WRITE) {
+	// 	if (clients[fd].RespGetRemainedToSent() > 0) {
+	// 		std::string tmp = clients[fd].RespGetFullRespTxt();
+	// 		size_t sent_bytes = strlen(clients[fd].RespGetFullRespTxt().c_str()) - clients[fd].RespGetRemainedToSent();
+	// 		tmp.erase(0, sent_bytes);
 			
-			if (strlen(tmp.c_str()) > BUFFER_SIZE)
-				ret = send(evlist[i].ident, tmp.c_str(), BUFFER_SIZE, 0);
-			else
-				ret = send(evlist[i].ident, tmp.c_str(), strlen(tmp.c_str()), 0);
-			if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-			clients[evlist[i].ident].RespSetRemainedToSent(clients[evlist[i].ident].RespGetRemainedToSent() - ret);
-		}
-		// int ret = send(evlist[i].ident, text, TEXT_LEN, 0);
-		// 	if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-	}
+	// 		// if (strlen(tmp.c_str()) > BUFFER_SIZE)
+	// 		// 	ret = send(fd, tmp.c_str(), BUFFER_SIZE, 0);
+	// 		// else
+	// 			ret = send(fd, tmp.c_str(), strlen(tmp.c_str()), 0);
+	// 		// if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+	// 		clients[fd].RespSetRemainedToSent(clients[fd].RespGetRemainedToSent() - ret);
+            
+    //         // clients[fd].getBuff().clear();
+    //     }
+	// 	// int ret = send(fd, text, TEXT_LEN, 0);
+	// 	// 	if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
+	// }
 }
 
 void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \
@@ -186,7 +193,7 @@ int main() {
             std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);
         }
         else if (nev > 0) {
-			std::cout << nev << " kevent OK\n";
+			// std::cout << nev << " kevent OK\n";
 			if (ft_check_evlist_error(chlist, evlist)) {
 				continue ;
 			}
