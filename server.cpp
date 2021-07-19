@@ -28,7 +28,7 @@ int ft_socket_init(int opt) {
 	else std::cout << "SOCKET OK\n";
 
 	addr.sin_family = PF_INET;
-	addr.sin_port = htons(50002);
+	addr.sin_port = htons(50001);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
@@ -70,8 +70,8 @@ bool ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<stru
 		}
 		close(chlist[i].ident);
 		chlist.erase(chlist.begin() + i);
-		evlist.erase(chlist.begin() + i);
-
+        evlist.clear();
+        evlist.reserve(chlist.size());
 		std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
 		return (true);
 		// exit(EXIT_FAILURE);
