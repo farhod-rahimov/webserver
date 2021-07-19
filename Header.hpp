@@ -33,7 +33,7 @@ bool	ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<stru
 
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 
-void    ft_send_response(std::map<int, Client> & clients, int fd);
+void    ft_send_response(std::map<int, Client> & clients, size_t fd, std::vector<struct kevent> & chlist);
 void    ft_create_response(Client & client);
 
 void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \

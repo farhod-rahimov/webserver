@@ -26,7 +26,7 @@ int main() {
     else
         std::cout << "CONNECT_CLIENT OK\n";
 
-    const char * message = "PUT / HTTP/1.1\r\nHELLO SERVER!\r\n\r\n";
+    const char * message = "GET / HTTP/1.1\r\nHELLO SERVER!\r\n\r\n";
     ret = send(socket_fd, message, strlen(message), 0);
     if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
     

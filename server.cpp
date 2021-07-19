@@ -52,8 +52,8 @@ bool ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<stru
 		}
 		close(chlist[i].ident);
 		chlist.erase(chlist.begin() + i);
-        evlist.clear();
-        evlist.reserve(chlist.size());
+        // evlist.clear();
+        // evlist.reserve(chlist.size());
 		std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
 		return (true);
 	}
@@ -100,7 +100,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
     if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
                     /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
         ft_parse_request(clients, fd);
-        ft_send_response(clients, fd);
+        ft_send_response(clients, fd, chlist);
         clients[fd].getBuff().clear();
     }
 }
@@ -132,7 +132,7 @@ int main() {
 	kq = kqueue_init(chlist, socket_fd);
 
 	while (1) {
-		nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
+        nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
         
 		if (nev < 0) {
             std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);
