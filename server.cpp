@@ -99,11 +99,8 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
     }
     if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
                     /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
-        // std::cout << clients[fd].getBuff() << std::endl << "-----------------------\n";
         ft_parse_request(clients, fd);
-        ft_create_response(clients, fd);
-        ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
-        // std::cout << "SENT\n" << clients[fd].RespGetFullRespTxt();
+        ft_send_response(clients, fd);
         clients[fd].getBuff().clear();
     }
 }

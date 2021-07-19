@@ -1,6 +1,6 @@
 SRCS =			./srcs/Client.cpp \
 				./ft_parse_request_1.cpp \
-				./ft_create_response.cpp \
+				./ft_send_response.cpp \
 				./server.cpp
 
 OBJS =			$(SRCS:.cpp=.o)
