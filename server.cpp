@@ -1,24 +1,6 @@
 #include "Header.hpp"
 #define BUFFER_SIZE 1000
 
-typedef struct sockaddr_in sockaddr_in;
-int		ft_socket_init(int opt);
-int		kqueue_init(std::vector<struct kevent> & chlist, int socket_fd);
-bool	ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
-
-
-bool	ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
-								std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
-
-void	ft_create_response(std::map<int, Client> & clients, int fd);
-
-void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
-						std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
-
-void	ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \
-					std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
-
-
 int ft_socket_init(int opt) {
 	int         socket_fd;
 	sockaddr_in addr;
@@ -74,7 +56,6 @@ bool ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<stru
         evlist.reserve(chlist.size());
 		std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
 		return (true);
-		// exit(EXIT_FAILURE);
 	}
 	return (false);
 }
@@ -100,27 +81,11 @@ bool ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<stru
 	return (false);
 }
 
-void ft_create_response(std::map<int, Client> & clients, int fd) {
-	clients[fd].RespSetProtocol("HTTP/1.1");
-	clients[fd].RespSetStatusCode("200");
-	clients[fd].RespSetStatusTxt("OK");
-	clients[fd].RespSetContentType("text/html");
-	clients[fd].RespSetContentLength(strlen(static_cast<const char *>("<html>\nPOKA\n</html>")));
-	clients[fd].RespSetContent("<html>\nPOKA\n</html>");
-	
-	clients[fd].RespCreateFullRespTxt();
-}
-
-const char * text = "HTTP/1.1 200 OK\nContent-Length: 19\nContent-Type: text/html\n\n<html>\nPOKA\n</html>";
-
 void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
 	char buf[BUFFER_SIZE + 1];
-    #define TEXT_LEN 79
 	int ret;
 
-	(void)chlist;
-	(void)clients;
-	
+    (void)chlist;
     int fd = evlist[i].ident;
 	if (evlist[i].filter & EVFILT_READ) {
 			/* We have data from the client */
@@ -133,31 +98,14 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
             clients[fd].getBuff().append(buf);
     }
     if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
-        std::cout << clients[fd].getBuff() << std::endl << "-----------------------\n";
+                    /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
+        // std::cout << clients[fd].getBuff() << std::endl << "-----------------------\n";
+        ft_parse_request(clients, fd);
         ft_create_response(clients, fd);
         ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
-        // write(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent());
-        std::cout << "SENT\n" << clients[fd].RespGetFullRespTxt();
+        // std::cout << "SENT\n" << clients[fd].RespGetFullRespTxt();
         clients[fd].getBuff().clear();
     }
-	// if (evlist[i].filter & EVFILT_WRITE) {
-	// 	if (clients[fd].RespGetRemainedToSent() > 0) {
-	// 		std::string tmp = clients[fd].RespGetFullRespTxt();
-	// 		size_t sent_bytes = strlen(clients[fd].RespGetFullRespTxt().c_str()) - clients[fd].RespGetRemainedToSent();
-	// 		tmp.erase(0, sent_bytes);
-			
-	// 		// if (strlen(tmp.c_str()) > BUFFER_SIZE)
-	// 		// 	ret = send(fd, tmp.c_str(), BUFFER_SIZE, 0);
-	// 		// else
-	// 			ret = send(fd, tmp.c_str(), strlen(tmp.c_str()), 0);
-	// 		// if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-	// 		clients[fd].RespSetRemainedToSent(clients[fd].RespGetRemainedToSent() - ret);
-            
-    //         // clients[fd].getBuff().clear();
-    //     }
-	// 	// int ret = send(fd, text, TEXT_LEN, 0);
-	// 	// 	if (ret < 0) std::cout << "SEND ERROR\n"; else  std::cout << "SEND OK\n";
-	// }
 }
 
 void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \

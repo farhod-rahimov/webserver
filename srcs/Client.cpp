@@ -51,6 +51,15 @@ std::string & Client::ReqGetProtocol(void) {
     return (this->_req_protocol);
 };
 
+void Client::ReqSetHost(std::string str) {
+    this->_req_host.clear();
+    this->_req_host = str;
+};
+
+std::string & Client::ReqGetHost(void) {
+    return (this->_req_host);
+};
+
 void Client::ReqSetConnection(std::string str) {
     this->_req_connection.clear();
     this->_req_connection = str;

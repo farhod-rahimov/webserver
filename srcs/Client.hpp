@@ -23,6 +23,9 @@ class Client {
 			
 			void ReqSetProtocol(std::string);
 			std::string & ReqGetProtocol(void);
+
+			void ReqSetHost(std::string);
+			std::string & ReqGetHost(void);
 			
 			void ReqSetConnection(std::string);
 			std::string & ReqGetConnection(void);
@@ -87,6 +90,7 @@ class Client {
 			
 			std::string _req_path;
 			std::string _req_protocol;
+			std::string _req_host;
 			std::string _req_connection;
 			
 			std::string _req_content_type;
