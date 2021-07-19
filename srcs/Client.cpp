@@ -133,6 +133,15 @@ std::string & Client::RespGetStatusTxt(void) {
     return (this->_resp_status_txt);
 };
 
+void Client::RespSetConnection(std::string str) {
+    this->_resp_connection.clear();
+    this->_resp_connection = str;
+};
+
+std::string & Client::RespGetConnection(void) {
+    return (this->_resp_connection);
+};
+
 void Client::RespSetContentType(std::string str) {
     this->_resp_content_type.clear();
     this->_resp_content_type = "Content-Type: ";

@@ -4,6 +4,7 @@ void ft_create_my_def_response(Client & client) {
 	client.RespSetProtocol("HTTP/1.1");
 	client.RespSetStatusCode("200");
 	client.RespSetStatusTxt("OK");
+	client.RespSetConnection("Connection: keep-alive");
 	client.RespSetContentType("text/html");
 	client.RespSetContentLength(strlen(static_cast<const char *>("<html>\nPOKA\n</html>")));
 	client.RespSetContent("<html>\nPOKA\n</html>");
@@ -17,6 +18,7 @@ void ft_send_not_implemented(Client & client) {
 	client.RespSetProtocol("HTTP/1.1");
 	client.RespSetStatusCode("501");
 	client.RespSetStatusTxt("NOT IMPLEMENTED");
+	client.RespSetConnection("Connection: keep-alive");
 	client.RespSetContentType("text/html");
 	client.RespSetContentLength(strlen(content));
 	client.RespSetContent(content);
@@ -29,10 +31,12 @@ bool ft_close_connection(std::string & _connection);
 void ft_send_response(std::map<int, Client> & clients, size_t fd, std::vector<struct kevent> & chlist) {
 	
 	ft_create_response(clients[fd]);
-    int ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
-		if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
+    
+	int ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
+	if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
 	std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
-	if (ft_close_connection(clients[fd].ReqGetConnection())) {
+	
+	if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
 		size_t i = 0;
 		for (; i < chlist.size(); i++) {
 			if (chlist[i].ident == fd)
@@ -45,12 +49,14 @@ void ft_send_response(std::map<int, Client> & clients, size_t fd, std::vector<st
 
 int ft_check_method(std::string & _method);
 int ft_check_protocol(std::string & _protocol);
+void ft_set_connection(Client & client);
 
 void ft_create_response(Client & client) {
 	if (ft_check_method(client.ReqGetMethod()) == -1 || ft_check_protocol(client.ReqGetProtocol()) == -1)
 		return (ft_send_not_implemented(client));
-	else
-		ft_create_my_def_response(client);
+	// ft_set_connection(client);
+	
+	ft_create_my_def_response(client);
 }
 
 int ft_check_method(std::string & _method) {
@@ -71,10 +77,11 @@ int ft_check_protocol(std::string & _protocol) {
 	return (1);
 }
 
-bool ft_close_connection(std::string & _connection) {
-	size_t pos = _connection.find("close");
+void ft_set_connection(Client & client) {
+	size_t pos = client.ReqGetConnection().find("close");
 
-	if (pos == _connection.npos)
-		return (false);
-	return (true);
+	if (pos != client.ReqGetConnection().npos)
+		client.RespSetConnection("Connection: close");
+	else
+		client.RespSetConnection("Connection: keep-alive");
 }

@@ -74,6 +74,9 @@ class Client {
 			int RespGetRemainedToSent(void);
 			void RespSetRemainedToSent(int);
 
+			void RespSetConnection(std::string);
+			std::string & RespGetConnection(void);
+
 			// COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON
 			
 			std::string & getBuff(void);
@@ -104,6 +107,8 @@ class Client {
 			std::string _resp_protocol;
 			std::string _resp_status_code;
 			std::string _resp_status_txt;
+			
+			std::string _resp_connection;
 			
 			std::string _resp_content_type;
 			// size_t		_resp_content_length;
