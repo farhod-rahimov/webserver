@@ -5,7 +5,7 @@ void ft_create_my_def_response(Client & client) {
 	client.RespSetStatusCode("200");
 	client.RespSetStatusTxt("OK");
 	client.RespSetConnection("Connection: keep-alive");
-	client.RespSetContentType("text/html");
+	client.RespSetContentType("text/html; charset=utf-8");
 	client.RespSetContentLength(strlen(static_cast<const char *>("<html>\nPOKA\n</html>")));
 	client.RespSetContent("<html>\nPOKA\n</html>");
 	
@@ -19,29 +19,25 @@ void ft_send_not_implemented(Client & client) {
 	client.RespSetStatusCode("501");
 	client.RespSetStatusTxt("NOT IMPLEMENTED");
 	client.RespSetConnection("Connection: keep-alive");
-	client.RespSetContentType("text/html");
+	client.RespSetContentType("text/html; charset=utf-8");
 	client.RespSetContentLength(strlen(content));
 	client.RespSetContent(content);
 	
 	client.RespCreateFullRespTxt();	
 }
 
-bool ft_close_connection(std::string & _connection);
-
 void ft_send_response(std::map<int, Client> & clients, size_t fd, std::vector<struct kevent> & chlist) {
-	
+	int ret;
+	(void)ret;
 	ft_create_response(clients[fd]);
     
-	int ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
-	if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
-	std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
+	ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
+	// if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
+	// std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
 	
 	if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
 		size_t i = 0;
-		for (; i < chlist.size(); i++) {
-			if (chlist[i].ident == fd)
-				break ;
-		}
+		for (; i < chlist.size() && chlist[i].ident != fd; i++) {}
 		close(fd);
 		chlist.erase(chlist.begin() + i);
 	}
@@ -52,11 +48,19 @@ int ft_check_protocol(std::string & _protocol);
 void ft_set_connection(Client & client);
 
 void ft_create_response(Client & client) {
-	if (ft_check_method(client.ReqGetMethod()) == -1 || ft_check_protocol(client.ReqGetProtocol()) == -1)
+	int method;
+
+	if ((method = ft_check_method(client.ReqGetMethod())) == -1 || ft_check_protocol(client.ReqGetProtocol()) == -1)
 		return (ft_send_not_implemented(client));
-	// ft_set_connection(client);
+	ft_set_connection(client);
+	if (method == 1)
+		ft_response_to_get(client);
+	// else if (method == 2)
+	// 	ft_response_to_post();
+	// else
+	// 	ft_response_to_delete();
 	
-	ft_create_my_def_response(client);
+	// ft_create_my_def_response(client);
 }
 
 int ft_check_method(std::string & _method) {

@@ -18,6 +18,8 @@
 #include <sys/event.h>
 #include <sys/time.h>
 
+#include <fstream>
+
 #include "./srcs/Client.hpp"
 
 
@@ -41,5 +43,8 @@ void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
 
 void	ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \
 					std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
+
+void ft_response_to_get(Client & client);
+
 
 #endif
