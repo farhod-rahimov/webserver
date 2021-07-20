@@ -20,7 +20,7 @@
 
 #include <fstream>
 
-#include "./srcs/Client.hpp"
+#include "Client.hpp"
 
 
 typedef struct sockaddr_in sockaddr_in;

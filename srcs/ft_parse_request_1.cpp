@@ -1,4 +1,4 @@
-#include "Header.hpp"
+#include "./headers/Header.hpp"
 
 void ft_get_method(std::string & _req_method, std::string & buf);
 void ft_get_path(std::string & _req_path, std::string & _req_method, std::string & buf);
