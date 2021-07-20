@@ -92,7 +92,8 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			ret = recv(fd, &buf, BUFFER_SIZE, 0);
 			if (ret < 0) {
 				std::cout << "recv ERROR";
-				exit(EXIT_FAILURE);
+				return ;
+				// exit(EXIT_FAILURE);
 			}
 			buf[ret] = '\0';
             clients[fd].getBuff().append(buf);
@@ -110,7 +111,8 @@ void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent
 	for (int i = 0; i < nev; i++) {
 		if (evlist[i].flags & EV_ERROR) { /* Report errors */
 			std::cout << "EV_ERROR\n";
-			exit(EXIT_FAILURE);
+			continue ;
+			// exit(EXIT_FAILURE);
 		}
 		if (ft_check_new_connection(socket_fd, i, chlist, evlist, clients) == true) {
 			continue ;

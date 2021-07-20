@@ -13,11 +13,25 @@ void ft_create_my_def_response(Client & client) {
 }
 
 void ft_send_not_implemented(Client & client) {
-	const char * content = "<html>\nError 501 Not Implemented\nThe request cannot be carried out by the web server\n</html>";
+	const char * content = "<html>\nError 501 Not Implemented.\nThe request cannot be carried out by the web server\n</html>";
 	
 	client.RespSetProtocol("HTTP/1.1");
 	client.RespSetStatusCode("501");
 	client.RespSetStatusTxt("NOT IMPLEMENTED");
+	client.RespSetConnection("Connection: keep-alive");
+	client.RespSetContentType("text/html; charset=utf-8");
+	client.RespSetContentLength(strlen(content));
+	client.RespSetContent(content);
+	
+	client.RespCreateFullRespTxt();	
+}
+
+void ft_send_not_found(Client & client) {
+	const char * content = "<html>\nError 404 Not Found.\nThe request cannot be carried out by the web server\n</html>";
+	
+	client.RespSetProtocol("HTTP/1.1");
+	client.RespSetStatusCode("404");
+	client.RespSetStatusTxt("NOT FOUND");
 	client.RespSetConnection("Connection: keep-alive");
 	client.RespSetContentType("text/html; charset=utf-8");
 	client.RespSetContentLength(strlen(content));
