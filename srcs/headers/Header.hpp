@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "Client.hpp"
+#include "../parser/Parser.hpp"
 
 
 typedef struct sockaddr_in sockaddr_in;
