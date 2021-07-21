@@ -1,5 +1,5 @@
 #include "./headers/Header.hpp"
-#define BUFFER_SIZE 1000
+#define BUFFER_SIZE 1000 // get - макс 2048 байт
 
 int ft_socket_init(int opt) {
 	int         socket_fd;

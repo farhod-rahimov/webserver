@@ -45,7 +45,13 @@ void	ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent
 					std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
 
 void	ft_response_to_get(Client & client);
+void	ft_response_to_post(Client & client);
 void	ft_create_my_def_response(Client & client);
+
+int		ft_read_file(const char * filename,  std::string & content);
+void	ft_send_not_found(Client & client);
+
+void	ft_create_header(const char * content_type, Client & client, std::string & content);
 
 
 

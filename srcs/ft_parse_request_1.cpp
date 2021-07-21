@@ -115,15 +115,13 @@ void ft_get_content_length(Client & client, std::string & buf) {
 };
 
 void ft_get_content(std::string & _req_content, std::string & buf) {
-    size_t i = buf.find("Content:");
-    size_t len;
+    size_t c_len = buf.find("Content-Length:");
     
-    if (i != buf.npos) {
-        for (; i < buf.size() && buf[i] != ' '; i++) {
-        }
-        for (len = ++i; len < buf.size() && buf[len] != '\r'; len++) {
-        }
-        _req_content = buf.substr(i, len - i);
+    // size_t i = buf.find("Content: ") + 4;
+    size_t i = buf.find("\r\n\r\n") + 4;
+
+    if (c_len != buf.npos && i != buf.npos && i < buf.size()) {
+        _req_content = buf.substr(i);
     }
     std::cout << "\nREQ_Content '" << _req_content << "'\n";
 };
