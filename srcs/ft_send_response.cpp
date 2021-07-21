@@ -71,8 +71,8 @@ void ft_create_response(Client & client) {
 		ft_response_to_get(client);
 	else if (method == 2)
 		ft_response_to_post(client);
-	// else
-	// 	ft_response_to_delete();
+	else
+		ft_response_to_delete(client);
 	
 	// ft_create_my_def_response(client);
 }

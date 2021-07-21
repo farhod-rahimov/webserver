@@ -1,5 +1,4 @@
 #include "./headers/Header.hpp"
-#include <string.h>
 
 void ft_execve_add_post(Client & client);
 
@@ -48,4 +47,7 @@ void ft_execve_add_post(Client & client) {
     else {
         waitpid(child, &status, 0);
     }
+    delete [] argv[0];
+    delete [] argv[1];
+    delete [] argv;
 }

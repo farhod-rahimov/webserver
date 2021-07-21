@@ -19,6 +19,7 @@
 #include <sys/time.h>
 
 #include <fstream>
+#include <string.h>
 
 #include "Client.hpp"
 
@@ -46,6 +47,7 @@ void	ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent
 
 void	ft_response_to_get(Client & client);
 void	ft_response_to_post(Client & client);
+void	ft_response_to_delete(Client & client);
 void	ft_create_my_def_response(Client & client);
 
 int		ft_read_file(const char * filename,  std::string & content);
