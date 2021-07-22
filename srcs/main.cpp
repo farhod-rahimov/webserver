@@ -1,7 +1,7 @@
 #include "./headers/Header.hpp"
 #define BUFFER_SIZE 1000 // get - макс 2048 байт
 
-int ft_socket_init(int opt) {
+int ft_socket_init(Server & server, int opt) {
 	int         socket_fd;
 	sockaddr_in addr;
 	
@@ -10,8 +10,12 @@ int ft_socket_init(int opt) {
 	else std::cout << "SOCKET OK\n";
 
 	addr.sin_family = PF_INET;
-	addr.sin_port = htons(50001);
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	
+	addr.sin_port = htons(std::atoi(server.getPort().c_str()));
+	addr.sin_addr.s_addr = inet_addr(server.getHost().c_str());
+
+	// addr.sin_port = htons(50001);
+	// addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		std::cout << "SET_SOCK_OPT ERROR";
@@ -33,6 +37,8 @@ int ft_socket_init(int opt) {
 
 int kqueue_init(std::vector<struct kevent> & chlist, int socket_fd) {
 	int kq;
+	(void)chlist;
+	(void)socket_fd;
 
 	if ((kq = kqueue()) == -1)
 		std::cout << "KQUEUE ERROR\n";
@@ -47,14 +53,19 @@ bool ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<stru
 
 	if (evlist[0].flags & EV_EOF) {
 		for (i = 0; i < chlist.size(); i++) {
-			if (chlist[i].ident == evlist[0].ident)
+			if (chlist[i].ident == evlist[0].ident) {
+				std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
 				break ;
+			}
+			else if (i + 1 == chlist.size()) {
+				std::cout <<  chlist[i].ident << " " << evlist[0].ident << " NNN Read direction of socket has shutdown\n";
+			}
 		}
 		close(chlist[i].ident);
 		chlist.erase(chlist.begin() + i);
         // evlist.clear();
         // evlist.reserve(chlist.size());
-		std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
+		// std::cout <<  chlist[i].ident << " " << evlist[0].ident << " Read direction of socket has shutdown\n";
 		return (true);
 	}
 	return (false);
@@ -141,18 +152,25 @@ int main(int argc, char **argv) {
 	std::vector<unsigned int>					socket_fd(servers.size());
 	std::vector<std::vector<struct kevent> > chlist(servers.size()), evlist(servers.size());
 
+	struct  kevent empty;
+
 	for (size_t i = 0; i < servers.size(); i++) {
-		chlist[i].reserve(1);
-		evlist[i].reserve(1);
-		socket_fd[i] = ft_socket_init(1);
+		chlist[i].push_back(empty);
+		evlist[i].push_back(empty);
+	
+		socket_fd[i] = ft_socket_init(servers[i], 1);
 		kq[i] = kqueue_init(chlist[i], socket_fd[i]);
 	}
 	
 	// socket_fd = ft_socket_init(1);
 	// kq = kqueue_init(chlist, socket_fd);
 
+	// std::cout << "SER SIZE " << servers.size();
+	// exit(1);
+
 	while (1) {
 		for (size_t i = 0; i < servers.size(); i++) {
+			std::cout << "																i = " << i << std::endl;
 			nev = kevent(kq[i], &chlist[i].front(), chlist[i].size(), &evlist[i].front(), chlist[i].size(), NULL);
 			
 			if (nev < 0) {
@@ -163,9 +181,42 @@ int main(int argc, char **argv) {
 				if (ft_check_evlist_error(chlist[i], evlist[i])) {
 					continue ;
 				}
-				ft_check_fds(nev, socket_fd[i], chlist[i], evlist[i], servers[0].getClients());
+				ft_check_fds(nev, socket_fd[i], chlist[i], evlist[i], servers[i].getClients());
 			}
 		}
 	}
 	return (0);
 }
+
+// int main(int argc, char **argv) {
+// 	int         				kq, nev;
+// 	unsigned int				socket_fd;
+// 	std::vector<struct kevent>	chlist(1);
+// 	std::vector<struct kevent>	evlist(1);
+// 	std::vector<Server>			servers;
+	
+// 	if (argc == 1) {
+// 		ft_parse(servers, DEFAULT_CONF);
+// 	}
+// 	else
+// 		ft_parse(servers, argv[1]);
+	
+// 	socket_fd = ft_socket_init(servers[0], 1);
+// 	kq = kqueue_init(chlist, socket_fd);
+
+// 	while (1) {
+//         nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
+        
+// 		if (nev < 0) {
+//             std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);
+//         }
+//         else if (nev > 0) {
+// 			// std::cout << nev << " kevent OK\n";
+// 			if (ft_check_evlist_error(chlist, evlist)) {
+// 				continue ;
+// 			}
+// 			ft_check_fds(nev, socket_fd, chlist, evlist, servers[0].getClients());
+//         }
+// 	}
+// 	return (0);
+// }

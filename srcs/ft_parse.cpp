@@ -62,7 +62,7 @@ void ft_parse(std::vector<Server> & servers, const char *conf_file) {
     
     
     ft_print_result(servers); //delete
-    exit(1);
+    // exit(1);
 }
 
 bool ft_check_config_extension(std::string conf_file) {

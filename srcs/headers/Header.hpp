@@ -27,7 +27,7 @@
 
 typedef struct sockaddr_in sockaddr_in;
 
-int		ft_socket_init(int opt);
+int		ft_socket_init(Server & server, int opt);
 int		kqueue_init(std::vector<struct kevent> & chlist, int socket_fd);
 bool	ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
 
