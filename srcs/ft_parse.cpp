@@ -10,6 +10,10 @@ void ft_server_settings_error(std::string & str);
 size_t ft_skip_spaces_tabs(std::string & content_file, size_t i);
 size_t ft_skip_notspaces_nottabs_notnewlines(std::string & content_file, size_t i);
 
+void ft_get_first_val_before_space(std::string first_field, std::string second_field, std::string & dst, std::string & src);
+size_t ft_get_num_of_locations(std::string & content_file, size_t start, size_t end);
+Location ft_get_location_settings(std::string & content_file, size_t start, size_t end);
+
 void ft_parse(std::vector<Server> & servers, const char *conf_file) {
     std::string content_file;
     size_t num_servers;
@@ -43,7 +47,6 @@ size_t ft_get_num_of_servers(std::string content_file) {
     return (num);
 }
 
-
 void ft_get_servers(std::string & content_file, size_t & num_servers, std::vector<Server> & servers) {
     size_t start_sever_setting = 0;
     size_t end_sever_setting = 0;
@@ -55,9 +58,6 @@ void ft_get_servers(std::string & content_file, size_t & num_servers, std::vecto
         servers.push_back(ft_get_common_settings(content_file, start_sever_setting, end_sever_setting));
     }
 }
-
-size_t ft_get_num_of_locations(std::string & content_file, size_t start, size_t end);
-Location ft_get_location_settings(std::string & content_file, size_t start, size_t end);
 
 Server ft_get_common_settings(std::string & content_file, size_t start, size_t end) {
     Server s;
@@ -112,12 +112,30 @@ Location ft_get_location_settings(std::string & content_file, size_t start, size
         ft_get_value(content_file, pos + str_fields[i].length(), str_values[i], str_fields[i]);
     }
 
+    if (!l.getRedirection().length() && !l.getLocationRoot().length()) {
+        std::cerr << "There should be at least one field in location. 'location root: ' or 'redirection: ''" << std::endl; exit(EXIT_FAILURE);
+    }
+
+    ft_get_first_val_before_space("'cgi extension'", "'cgi path'", l.getCgiExtension(), l.getCgiPath());
+    ft_get_first_val_before_space("'redirection status code'", "'redirection address'", l.getRedirectionStatusCode(), l.getRedirection());
+
     std::string print_values[10] = {l.getAllowedMethods(), l.getRedirectionStatusCode(), l.getRedirection(), l.getPath(), l.getDefaultFile(), \
                                     l.getCgiExtension(), l.getCgiPath(), l.getLocationRoot(), l.getUploadDirectory(), l.getAutoindex()};
     for (int i = 0; i < 10; i++) {
         std::cout << print_values[i] << std::endl;
     }
     exit(1);
+}
+
+void ft_get_first_val_before_space(std::string first_field, std::string second_field, std::string & dst, std::string & src) {
+    size_t len = 0;
+    
+    len = ft_skip_notspaces_nottabs_notnewlines(src, 0);
+    if (src.find(" ", 0) == src.npos && src.length() > 0) {
+        std::cerr << "There should be " << first_field << " before " << second_field << " in location" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    dst = src.substr(0, len);
 }
 
 size_t ft_get_num_of_locations(std::string & content_file, size_t start, size_t end) {
@@ -130,7 +148,6 @@ size_t ft_get_num_of_locations(std::string & content_file, size_t start, size_t 
     }
     return (num);
 }
-
 
 void ft_get_value(std::string & content_file, size_t pos, std::string * val, std::string & field) {
     pos = ft_skip_spaces_tabs(content_file, pos);
