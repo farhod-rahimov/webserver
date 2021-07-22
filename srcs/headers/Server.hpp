@@ -7,7 +7,7 @@
 
 #include "./Client.hpp"
 
-#define DEFAULT_CONF "/Users/btammara/webserver/srcs/config/default.conf"
+#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
 typedef struct Location location;
 
@@ -47,6 +47,9 @@ class Server {
 struct Location {
     public:
         Location();
+        Location(const Location * src);
+        
+        Location & operator = (const Location & src);
 
         std::string & getAllowedMethods(void);
         std::string & getRedirection(void);

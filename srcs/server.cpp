@@ -12,6 +12,16 @@ Server::Server(const Server & src) {
 
 Server & Server::operator = (const Server & src) {          // complete it
     if (this != &src) {
+        this->_host = src._host;
+        this->_port = src._port;
+        this->_server_name = src._server_name;
+        this->_server_root = src._server_root;
+        this->_default_error_status_code = src._default_error_status_code;
+        this->_default_error_page_path = src._default_error_page_path;
+        this->_limit_body_size = src._limit_body_size;
+       
+        this->_locations = src._locations;
+        this->_clients = src._clients;
     }
     return (*this);
 };
@@ -55,8 +65,28 @@ std::map<int, Client> & Server::getClients(void) {
 // LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION
 
 Location::Location() {
-    this->_autoindex = "false";
+    this->_autoindex = "off";
     this->_allowed_methods = "GET";
+};
+
+Location::Location(const Location * src) {
+    *this = src;
+};
+
+Location & Location::operator = (const Location & src) {
+    if (this != &src) {
+        this->_allowed_methods = src._allowed_methods;
+        this->_redirection = src._redirection;
+        this->_redirection_status_code = src._redirection_status_code;
+        this->_path = src._path;
+        this->_autoindex = src._autoindex;
+        this->_default_file = src._default_file;
+        this->_cgi_path = src._cgi_path;
+        this->_cgi_extension = src._cgi_extension;
+        this->_location_root = src._location_root;
+        this->_upload_directory = src._upload_directory;
+    }
+    return(*this);
 };
 
 std::string & Location::getAllowedMethods(void) {
