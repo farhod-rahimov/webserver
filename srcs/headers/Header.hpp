@@ -56,6 +56,6 @@ void	ft_send_not_found(Client & client);
 
 void	ft_create_header(const char * content_type, Client & client, std::string & content);
 
-void ft_parse(std::vector<Server> & servers, const char *conf_file);
+void	ft_parse(std::vector<Server> & servers, const char *conf_file);
 
 #endif
