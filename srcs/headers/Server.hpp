@@ -7,8 +7,6 @@
 
 #include "./Client.hpp"
 
-#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
-
 typedef struct Location location;
 
 class Server {

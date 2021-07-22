@@ -24,11 +24,12 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
+#define DEFAULT_CONF "/Users/farhod/webserver/hosted_website/config/default.conf"
 
 typedef struct sockaddr_in sockaddr_in;
 
 int		ft_socket_init(Server & server, int opt);
-int		kqueue_init(std::vector<struct kevent> & chlist, int socket_fd);
+int		kqueue_init(void);
 bool	ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
 
 

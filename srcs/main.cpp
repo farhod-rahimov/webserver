@@ -35,16 +35,13 @@ int ft_socket_init(Server & server, int opt) {
 	return (socket_fd);
 }
 
-int kqueue_init(std::vector<struct kevent> & chlist, int socket_fd) {
+int kqueue_init(void) {
 	int kq;
-	(void)chlist;
-	(void)socket_fd;
 
 	if ((kq = kqueue()) == -1)
 		std::cout << "KQUEUE ERROR\n";
 	else std::cout << "KQUEUE OK\n";
 
-    EV_SET(&chlist[0], socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 	return (kq);
 }
 
@@ -140,48 +137,34 @@ int main(int argc, char **argv) {
 	// std::vector<struct kevent>	evlist(1);
 	// std::vector<Server>			servers;
 
-	int											nev;
-	std::vector<Server>							servers;
+	int					kq, nev;
+	std::vector<Server>	servers;
 	
-	// std::vector<Server>			servers(1);
-
 	if (argc == 1) {ft_parse(servers, DEFAULT_CONF);}
 	else {ft_parse(servers, argv[1]);}
 	
-	std::vector<int>							kq(servers.size());
-	std::vector<unsigned int>					socket_fd(servers.size());
-	std::vector<std::vector<struct kevent> > chlist(servers.size()), evlist(servers.size());
+	std::vector<unsigned int>	socket_fd(servers.size());
+	std::vector<struct kevent>	chlist(servers.size()), evlist(servers.size());
 
-	struct  kevent empty;
-
+	kq = kqueue_init();
 	for (size_t i = 0; i < servers.size(); i++) {
-		chlist[i].push_back(empty);
-		evlist[i].push_back(empty);
-	
 		socket_fd[i] = ft_socket_init(servers[i], 1);
-		kq[i] = kqueue_init(chlist[i], socket_fd[i]);
+    	EV_SET(&chlist[i], socket_fd[i], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 	}
 	
-	// socket_fd = ft_socket_init(1);
-	// kq = kqueue_init(chlist, socket_fd);
-
-	// std::cout << "SER SIZE " << servers.size();
-	// exit(1);
-
 	while (1) {
-		for (size_t i = 0; i < servers.size(); i++) {
-			std::cout << "																i = " << i << std::endl;
-			nev = kevent(kq[i], &chlist[i].front(), chlist[i].size(), &evlist[i].front(), chlist[i].size(), NULL);
-			
-			if (nev < 0) {
-				std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);
+		nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
+		
+		if (nev < 0) {
+			std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);
+		}
+		else if (nev > 0) {
+			// std::cout << nev << " kevent OK\n";
+			if (ft_check_evlist_error(chlist, evlist)) {
+				continue ;
 			}
-			else if (nev > 0) {
-				// std::cout << nev << " kevent OK\n";
-				if (ft_check_evlist_error(chlist[i], evlist[i])) {
-					continue ;
-				}
-				ft_check_fds(nev, socket_fd[i], chlist[i], evlist[i], servers[i].getClients());
+			for (size_t i = 0; i < servers.size(); i++) {
+				ft_check_fds(nev, socket_fd[i], chlist, evlist, servers[i].getClients());
 			}
 		}
 	}
