@@ -5,7 +5,7 @@ SRCS =			./srcs/Client.cpp \
 				./srcs/ft_response_to_get.cpp \
 				./srcs/ft_response_to_post.cpp \
 				./srcs/ft_response_to_delete.cpp \
-				./srcs/parser.cpp \
+				./srcs/ft_parse.cpp \
 				./srcs/main.cpp
 
 OBJS =			$(SRCS:.cpp=.o)

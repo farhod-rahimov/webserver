@@ -16,77 +16,85 @@ Server & Server::operator = (const Server & src) {          // complete it
     return (*this);
 };
 
-std::string & Server::GetHost(void) {
+std::string & Server::getHost(void) {
     return (this->_host);
 };
 
-std::string & Server::GetPort(void) {
+std::string & Server::getPort(void) {
     return (this->_port);
 };
 
-std::string & Server::GetServerName(void) {
+std::string & Server::getServerName(void) {
     return (this->_server_name);
 };
 
-std::string & Server::GetServerRoot(void) {
+std::string & Server::getServerRoot(void) {
     return (this->_server_root);
 };
 
-std::string & Server::GetDefaultErrorPage(void) {
-    return (this->_default_error_page);
+std::string & Server::getDefaultErrorStatusCode(void) {
+    return (this->_default_error_status_code);
 };
 
-std::string & Server::GetLimitBodySize(void) {
+std::string & Server::getDefaultErrorPagePath(void) {
+    return (this->_default_error_page_path);
+};
+
+std::string & Server::getLimitBodySize(void) {
     return (this->_limit_body_size);
 };
 
-std::vector<location> & Server::GetLocations(void) {
+std::vector<location> & Server::getLocations(void) {
     return (this->_locations);
 };
 
-std::map<int, Client> & Server::GetClients(void) {
+std::map<int, Client> & Server::getClients(void) {
     return (this->_clients);
 };
 
 // LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION
 
 Location::Location() {
-    this->_autoindex = false;
-    this->_upload_accept = false;
+    this->_autoindex = "false";
+    this->_allowed_methods = "GET";
 };
 
-std::string & Location::GetAllowMethods(void) {
-    return (this->_allow_methods);
+std::string & Location::getAllowedMethods(void) {
+    return (this->_allowed_methods);
 };
 
-std::string & Location::GetRedirection(void) {
+std::string & Location::getRedirection(void) {
     return (this->_redirection);
 };
 
-std::string & Location::GetPath(void) {
+std::string & Location::getRedirectionStatusCode(void) {
+    return (this->_redirection_status_code);
+};
+
+std::string & Location::getPath(void) {
     return (this->_path);
 };
 
-bool        & Location::GetAutoindex(void) {
+std::string & Location::getAutoindex(void) {
     return (this->_autoindex);
 };
 
-std::string & Location::GetDefaultFile(void) {
+std::string & Location::getDefaultFile(void) {
     return (this->_default_file);
 };
 
-std::string & Location::GetCgiPath(void) {
+std::string & Location::getCgiPath(void) {
     return (this->_cgi_path);
 };
 
-std::string & Location::GetLocationRoot(void) {
+std::string & Location::getCgiExtension(void) {
+    return (this->_cgi_extension);
+};
+
+std::string & Location::getLocationRoot(void) {
     return (this->_location_root);
 };
 
-bool        & Location::GetUploadAccept(void) {
-    return (this->_upload_accept);
-};
-
-std::string & Location::GetUploadDirectory(void) {
+std::string & Location::getUploadDirectory(void) {
     return (this->_upload_directory);
 };

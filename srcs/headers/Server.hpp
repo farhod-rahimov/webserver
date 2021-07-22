@@ -7,6 +7,8 @@
 
 #include "./Client.hpp"
 
+#define DEFAULT_CONF "/Users/btammara/webserver/srcs/config/default.conf"
+
 typedef struct Location location;
 
 class Server {
@@ -18,22 +20,24 @@ class Server {
         
         Server & operator = (const Server & src);
 
-        std::string             & GetHost(void);
-        std::string             & GetPort(void);
-        std::string             & GetServerName(void);
-        std::string             & GetServerRoot(void);
-        std::string             & GetDefaultErrorPage(void);
-        std::string             & GetLimitBodySize(void);
+        std::string             & getHost(void); // mandatory
+        std::string             & getPort(void); // mandatory
+        std::string             & getServerName(void);
+    std::string             & getServerRoot(void);              // лишний ?
+        std::string             & getDefaultErrorStatusCode(void); // mandatory
+        std::string             & getDefaultErrorPagePath(void); // mandatory
+        std::string             & getLimitBodySize(void); // mandatory  // in bytes
         
-        std::vector<location>   & GetLocations(void);
-        std::map<int, Client>     & GetClients(void);
+        std::vector<location>   & getLocations(void);
+        std::map<int, Client>   & getClients(void);
 
     private:
         std::string             _host;
         std::string             _port;
         std::string             _server_name;
-        std::string             _server_root;
-        std::string             _default_error_page;
+        std::string             _server_root;                       // лишний ?
+        std::string             _default_error_status_code;
+        std::string             _default_error_page_path;
         std::string             _limit_body_size;
 
         std::vector<location>   _locations;
@@ -44,24 +48,26 @@ struct Location {
     public:
         Location();
 
-        std::string & GetAllowMethods(void);
-        std::string & GetRedirection(void);
-        std::string & GetPath(void);
-        bool        & GetAutoindex(void);
-        std::string & GetDefaultFile(void);
-        std::string & GetCgiPath(void);
-        std::string & GetLocationRoot(void);
-        bool        & GetUploadAccept(void);
-        std::string & GetUploadDirectory(void);
+        std::string & getAllowedMethods(void);
+        std::string & getRedirection(void);
+        std::string & getRedirectionStatusCode(void); //
+        std::string & getPath(void);
+        std::string & getAutoindex(void);
+        std::string & getDefaultFile(void);
+        std::string & getCgiPath(void);
+        std::string & getCgiExtension(void); //
+        std::string & getLocationRoot(void);
+        std::string & getUploadDirectory(void); // 10
 
-        std::string _allow_methods;
+        std::string _allowed_methods;
         std::string _redirection;
+        std::string _redirection_status_code;
         std::string _path;
-        bool        _autoindex;
+        std::string _autoindex;
         std::string _default_file;
         std::string _cgi_path;
+        std::string _cgi_extension;
         std::string _location_root;
-        bool        _upload_accept;
         std::string _upload_directory;
 };
 

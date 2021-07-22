@@ -122,13 +122,20 @@ void ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent
 };
 
 
-int main() {
-	int         			kq, nev;
-	unsigned int			socket_fd;
-	std::vector<Server>		servers(1);
+int main(int argc, char **argv) {
+	int         				kq, nev;
+	unsigned int				socket_fd;
+	std::vector<struct kevent>	chlist(1);
+	std::vector<struct kevent>	evlist(1);
+	std::vector<Server>			servers;
+	
+	// std::vector<Server>			servers(1);
 
-	std::vector<struct kevent> chlist(1);
-	std::vector<struct kevent> evlist(1);
+	if (argc == 1) {
+		ft_parse(servers, DEFAULT_CONF);
+	}
+	else
+		ft_parse(servers, argv[1]);
 	
 	socket_fd = ft_socket_init(1);
 	kq = kqueue_init(chlist, socket_fd);
@@ -144,7 +151,7 @@ int main() {
 			if (ft_check_evlist_error(chlist, evlist)) {
 				continue ;
 			}
-			ft_check_fds(nev, socket_fd, chlist, evlist, servers[0].GetClients());
+			ft_check_fds(nev, socket_fd, chlist, evlist, servers[0].getClients());
         }
 	}
 	return (0);
