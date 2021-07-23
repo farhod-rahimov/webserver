@@ -150,8 +150,8 @@ Location ft_get_location_settings(std::string & content_file, size_t start, size
     ft_get_first_val_before_space("'cgi extension'", "'cgi path'", l.getCgiExtension(), l.getCgiPath());
     ft_get_first_val_before_space("'redirection status code'", "'redirection address'", l.getRedirectionStatusCode(), l.getRedirection());
 
-    std::string print_values[10] = {l.getAllowedMethods(), l.getRedirectionStatusCode(), l.getRedirection(), l.getPath(), l.getDefaultFile(), \
-                                    l.getCgiExtension(), l.getCgiPath(), l.getLocationRoot(), l.getUploadDirectory(), l.getAutoindex()};
+    // std::string print_values[10] = {l.getAllowedMethods(), l.getRedirectionStatusCode(), l.getRedirection(), l.getPath(), l.getDefaultFile(), \
+    //                                 l.getCgiExtension(), l.getCgiPath(), l.getLocationRoot(), l.getUploadDirectory(), l.getAutoindex()};
     return (l);
 }
 
