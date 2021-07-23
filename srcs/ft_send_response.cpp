@@ -110,8 +110,7 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 			}
 		}
 	}
-	else
-		responding_location = locations[idx];
+	responding_location = locations[idx];
 }
 
 size_t ft_get_max_match(std::string & s1, std::string & s2) {
