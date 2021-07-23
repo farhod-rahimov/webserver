@@ -2,16 +2,20 @@
 
 // SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER | SERVER
 
-Server::Server() {};
+Server::Server() {
+    this->_check_flag = true;
+};
 
 Server::~Server() {};
 
 Server::Server(const Server & src) {
+    this->_check_flag = true;
     *this = src;
 };
 
 Server & Server::operator = (const Server & src) {          // complete it
     if (this != &src) {
+        this->_check_flag = src._check_flag;
         this->_host = src._host;
         this->_port = src._port;
         this->_server_name = src._server_name;
@@ -62,6 +66,10 @@ std::map<int, Client> & Server::getClients(void) {
     return (this->_clients);
 };
 
+bool & Server::getCheckFlag(void) {
+    return (this->_check_flag);
+};
+
 // LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION | LOCATION
 
 Location::Location() {
@@ -70,6 +78,8 @@ Location::Location() {
 };
 
 Location::Location(const Location * src) {
+    this->_autoindex = "off";
+    this->_allowed_methods = "GET";
     *this = src;
 };
 

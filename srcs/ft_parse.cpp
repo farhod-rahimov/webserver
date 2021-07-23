@@ -61,7 +61,7 @@ void ft_parse(std::vector<Server> & servers, const char *conf_file) {
     ft_get_servers(content_file, num_servers, servers);
     
     
-    ft_print_result(servers); //delete
+    // ft_print_result(servers); //delete
     // exit(1);
 }
 

@@ -26,6 +26,8 @@
 
 #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
+std::vector<Server>	servers;
+
 typedef struct sockaddr_in sockaddr_in;
 
 int		ft_socket_init(Server & server, int opt);

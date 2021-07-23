@@ -5,6 +5,14 @@ int ft_socket_init(Server & server, int opt) {
 	int         socket_fd;
 	sockaddr_in addr;
 	
+	for (size_t i = 0; i < servers.size(); i++) {
+		if (server.getHost() == servers[i].getHost() && server.getPort() == servers[i].getPort()) {
+			if (&server != &servers[i] && server.getCheckFlag() && servers[i].getCheckFlag()) {
+				server.getCheckFlag() = false; return (-1);
+			}
+		}
+	}
+ 
 	if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
 		std::cout << "SOCKET ERROR\n"; 
 	else std::cout << "SOCKET OK\n";
@@ -125,18 +133,23 @@ void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 
 int main(int argc, char **argv) {
 	int					kq, nev;
-	std::vector<Server>	servers;
 	
 	if (argc == 1) {ft_parse(servers, DEFAULT_CONF);}
 	else {ft_parse(servers, argv[1]);}
 	
-	std::vector<int>	socket_fd(servers.size());
-	std::vector<struct kevent>	chlist(servers.size()), evlist(servers.size());
+	std::vector<int>	socket_fd;
+	std::vector<struct kevent>	chlist, evlist;
 
 	kq = kqueue_init();
+	struct kevent tmp_kev;
+	int tmp_sock;
 	for (size_t i = 0; i < servers.size(); i++) {
-		socket_fd[i] = ft_socket_init(servers[i], 1);
-    	EV_SET(&chlist[i], socket_fd[i], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+		if ((tmp_sock = ft_socket_init(servers[i], 1)) > 0) {
+			socket_fd.push_back(tmp_sock);
+			chlist.push_back(tmp_kev);
+			evlist.push_back(tmp_kev);
+    		EV_SET(&chlist.back(), socket_fd.back(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+		}
 	}
 	
 	while (1) {
@@ -150,8 +163,11 @@ int main(int argc, char **argv) {
 			if (ft_check_evlist_error(chlist, evlist)) {
 				continue ;
 			}
+			int n = 0;
 			for (size_t i = 0; i < servers.size(); i++) {
-				ft_check_fds(nev, socket_fd[i], chlist, evlist, servers[i].getClients());
+				if (servers[i].getCheckFlag()) {
+					ft_check_fds(nev, socket_fd[n++], chlist, evlist, servers[i].getClients());
+				}
 			}
 		}
 	}
