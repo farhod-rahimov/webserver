@@ -11,6 +11,7 @@
 #include <fcntl.h>
 
 #include <vector>
+#include <string>
 #include <map>
 #include <unistd.h>
 
@@ -19,14 +20,13 @@
 #include <sys/time.h>
 
 #include <fstream>
-#include <string.h>
 
 #include "Client.hpp"
 #include "Server.hpp"
 
 #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
-std::vector<Server>	servers;
+// std::vector<Server>	servers;
 
 typedef struct sockaddr_in sockaddr_in;
 

@@ -1,6 +1,8 @@
 #include "./headers/Header.hpp"
 #define BUFFER_SIZE 1000 // get - макс 2048 байт
 
+std::vector<Server>	servers;
+
 int ft_socket_init(Server & server, int opt) {
 	int         socket_fd;
 	sockaddr_in addr;

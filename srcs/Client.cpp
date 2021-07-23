@@ -1,5 +1,4 @@
 #include "./headers/Client.hpp"
-#include <iostream>
 
 Client::Client() {
     this->_req_content_length = 0;
