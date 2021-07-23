@@ -40,14 +40,14 @@ bool	ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 
-void    ft_send_response(std::map<int, Client> & clients, size_t fd, std::vector<struct kevent> & chlist);
-void    ft_create_response(Client & client);
+void    ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers);
+void    ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server);
 
 void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
-						std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
+						std::vector<struct kevent> & evlist, Server & server);
 
 void	ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlist, \
-					std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
+					std::vector<struct kevent> & evlist, Server & server);
 
 void	ft_response_to_get(Client & client);
 void	ft_response_to_post(Client & client);

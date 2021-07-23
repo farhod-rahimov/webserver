@@ -10,7 +10,7 @@ int ft_socket_init(Server & server, int opt) {
 	for (size_t i = 0; i < servers.size(); i++) {
 		if (server.getHost() == servers[i].getHost() && server.getPort() == servers[i].getPort()) {
 			if (&server != &servers[i] && server.getCheckFlag() && servers[i].getCheckFlag()) {
-				server.getCheckFlag() = false; return (-1);
+				servers[i].getCheckFlag() = false; return (-1);
 			}
 		}
 	}
@@ -93,10 +93,11 @@ bool ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 	return (false);
 }
 
-void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
+void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist, Server & server) {
 	char buf[BUFFER_SIZE + 1];
 	int ret;
-
+	
+	std::map<int, Client> & clients = server.getClients();
     (void)chlist;
     int fd = evlist[i].ident;
 	if (evlist[i].filter & EVFILT_READ) {
@@ -112,13 +113,15 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
     if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
                     /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
         ft_parse_request(clients, fd);
-        ft_send_response(clients, fd, chlist);
+        ft_send_response(server, fd, chlist, servers);
         clients[fd].getBuff().clear();
     }
 }
 
 void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlist, \
-					std::vector<struct kevent> & evlist, std::map<int, Client> & clients) {
+					std::vector<struct kevent> & evlist, Server & server) {
+	std::map<int, Client> & clients = server.getClients();
+	
 	for (int i = 0; i < nev; i++) {
 		if (evlist[i].flags & EV_ERROR) { /* Report errors */
 			std::cout << "EV_ERROR\n";
@@ -128,7 +131,7 @@ void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 		if (ft_check_new_connection(socket_fd, i, chlist, evlist, clients) == true) {
 			continue ;
 		}
-		ft_check_clients(i, chlist, evlist, clients);
+		ft_check_clients(i, chlist, evlist, server);
 	}
 };
 
@@ -168,7 +171,8 @@ int main(int argc, char **argv) {
 			int n = 0;
 			for (size_t i = 0; i < servers.size(); i++) {
 				if (servers[i].getCheckFlag()) {
-					ft_check_fds(nev, socket_fd[n++], chlist, evlist, servers[i].getClients());
+					ft_check_fds(nev, socket_fd[n++], chlist, evlist, servers[i]);
+					// ft_check_fds(nev, socket_fd[n++], chlist, evlist, servers[i].getClients());
 				}
 			}
 		}
