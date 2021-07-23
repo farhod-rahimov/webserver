@@ -33,8 +33,11 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 }
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
 void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path);
-int ft_check_protocol(std::string req_protocol);
+size_t ft_get_max_match(std::string & s1, std::string & s2);
+void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string location_root);
+
 int ft_get_method(std::string req_method, std::string supported_methods);
+int ft_check_protocol(std::string req_protocol);
 
 void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server) {
 	int method;
@@ -42,30 +45,14 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	
 	ft_get_responding_server(servers, client, responding_server);
 	ft_get_responding_location(responding_server.getLocations(), responding_location, client.ReqGetPath());
+	ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
 
-	std::cout << "RESPONDING LOCATION " << responding_location.getPath();
 	exit(1);
 
 	if (((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0) || ft_check_protocol(client.ReqGetProtocol()) < 0)
 		return (ft_send_not_implemented(client));
 
 	exit(1);
-}
-
-
-int ft_get_method(std::string req_method, std::string supported_methods) {
-	if (req_method.find("GET") != req_method.npos && supported_methods.find("GET") != supported_methods.npos) {return (1);}
-	else if (req_method.find("GET") != req_method.npos && supported_methods.length() == 0) {return (1);}
-	else if (req_method.find("POST") != req_method.npos && supported_methods.find("POST") != supported_methods.npos) {return (2);}
-	else if (req_method.find("DELETE") != req_method.npos && supported_methods.find("DELETE") != supported_methods.npos) {return (3);}
-	
-	return (-1);
-}
-
-int ft_check_protocol(std::string req_protocol) {
-	if (req_protocol.find("HTTP/1.1") == req_protocol.npos)
-		return (-1);
-	return (1);
 }
 
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server) {
@@ -86,8 +73,6 @@ void ft_get_responding_server(std::vector<Server> & servers, Client & client, Se
 	}
 	// std::cout << responding_server.getServerName();
 }
-
-size_t ft_get_max_match(std::string & s1, std::string & s2);
 
 void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path) {
 	size_t max_match = ft_get_max_match(locations[0].getPath(), req_path);
@@ -113,6 +98,12 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 	responding_location = locations[idx];
 }
 
+void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string location_root) {  // !! location_root не принимай по ссылке
+	// stopped here, http://localhost:50001/blalalalala works incorrect
+	req_path.replace(0, location_path.length(), location_root);
+	std::cout << "REQ NEW PATH " << req_path << std::endl;
+}
+
 size_t ft_get_max_match(std::string & s1, std::string & s2) {
 	size_t pos1 = 0, pos2 = 0, max = 0;
 	std::string tmp1, tmp2;
@@ -129,6 +120,21 @@ size_t ft_get_max_match(std::string & s1, std::string & s2) {
 		pos1 += 1; pos2 += 1; max += 1;
 	}
 	return (max);
+}
+
+int ft_get_method(std::string req_method, std::string supported_methods) {
+	if (req_method.find("GET") != req_method.npos && supported_methods.find("GET") != supported_methods.npos) {return (1);}
+	else if (req_method.find("GET") != req_method.npos && supported_methods.length() == 0) {return (1);}
+	else if (req_method.find("POST") != req_method.npos && supported_methods.find("POST") != supported_methods.npos) {return (2);}
+	else if (req_method.find("DELETE") != req_method.npos && supported_methods.find("DELETE") != supported_methods.npos) {return (3);}
+	
+	return (-1);
+}
+
+int ft_check_protocol(std::string req_protocol) {
+	if (req_protocol.find("HTTP/1.1") == req_protocol.npos)
+		return (-1);
+	return (1);
 }
 
 void ft_set_connection_header(Client & client) {
