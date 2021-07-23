@@ -24,7 +24,7 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
-#define DEFAULT_CONF "/Users/farhod/webserver/hosted_website/config/default.conf"
+#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
 typedef struct sockaddr_in sockaddr_in;
 
@@ -33,7 +33,7 @@ int		kqueue_init(void);
 bool	ft_check_evlist_error(std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist);
 
 
-bool	ft_check_new_connection(unsigned int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
+bool	ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent> & chlist, \
 								std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
 
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
@@ -44,7 +44,7 @@ void    ft_create_response(Client & client);
 void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
 						std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
 
-void	ft_check_fds(int & nev, unsigned int & socket_fd, std::vector<struct kevent> & chlist, \
+void	ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlist, \
 					std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
 
 void	ft_response_to_get(Client & client);
