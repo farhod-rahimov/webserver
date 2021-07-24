@@ -56,7 +56,7 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	// else if (method == 2) {ft_response_to_post();}
 	// else if (method == 3) {ft_response_to_delete();}
 
-	exit(1);
+	// exit(1);
 }
 
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server) {

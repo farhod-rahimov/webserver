@@ -9,12 +9,13 @@ void ft_response_to_get(Client & client, Server & server, Location & location) {
     std::string content;
 
     ft_get_content_and_content_type(client, server, location, content);
-    std::cout << "CONTENT TYPE " << client.RespGetContentType() << std::endl;
 }
 
 void ft_get_content_and_content_type(Client & client, Server & server, Location & location, std::string & content) {
     std::string content_type, extension, read_file = client.ReqGetPath();
     size_t pos;
+
+    std::string status_code;
 
     if (!ft_read_file(read_file.c_str(), content)) {
         read_file = server.getDefaultErrorPagePath();
@@ -23,12 +24,15 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();
                 if (!ft_read_file(read_file.c_str(), content)) {
-                    ft_send_not_found(client); ft_create_header("text/html", client, content); return ;
+                    ft_send_not_found(client); ft_create_header("text/html, charset=utf-8", client, content); return ;
+                }
+                else {
+                    status_code = server.getDefaultErrorStatusCode();
                 }
             }
         }
         else if (!ft_read_file(read_file.c_str(), content)) {
-            ft_send_not_found(client); ft_create_header("text/html", client, content); return ;
+            ft_send_not_found(client); ft_create_header("text/html, charset=utf-8", client, content); return ;
         }
     }
     if ((pos =read_file.find_last_of(".")) != read_file.npos) {
@@ -37,6 +41,8 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
         ft_get_content_type(content_type, extension);
     }
     ft_create_header(content_type.c_str(), client, content);
+    if (status_code.length())
+        client.RespGetStatusCode() = status_code;
 }
 
 void ft_get_content_type(std::string & content_type, std::string & extension) {
@@ -93,7 +99,6 @@ void ft_create_header(const char * content_type, Client & client, std::string & 
     client.RespSetProtocol("HTTP/1.1");
 	client.RespSetStatusCode("200");
 	client.RespSetStatusTxt("OK");
-	client.RespSetConnection("Connection: keep-alive");
 	client.RespSetContentType(content_type);
 	client.RespSetContentLength(content.length());
 	client.RespSetContent(content);
@@ -104,11 +109,8 @@ void ft_create_header(const char * content_type, Client & client, std::string & 
 void ft_send_not_found(Client & client) {
 	const char * content = "<html>\nError 404 Not Found.\nThe request cannot be carried out by the web server\n</html>";
 	
-	client.RespSetProtocol("HTTP/1.1");
 	client.RespSetStatusCode("404");
 	client.RespSetStatusTxt("NOT FOUND");
-	client.RespSetConnection("Connection: keep-alive");
-	client.RespSetContentType("text/html; charset=utf-8");
 	client.RespSetContentLength(strlen(content));
 	client.RespSetContent(content);
 	

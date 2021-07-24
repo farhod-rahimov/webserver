@@ -7,6 +7,10 @@ Client::Client() {
     // this->_resp_content_length = 0;
     this->_resp_remained_to_sent = 0;
     this->_resp_num = 0;
+	this->_resp_protocol = "HTTP/1.1";
+    this->_resp_connection = "Connection: keep-alive";
+    this->_resp_status_code = "200";
+    this->_resp_status_txt = "OK";
 };
 
 Client::~Client() {};
@@ -17,6 +21,28 @@ Client::Client(const Client & src) {
 		
 Client & Client::operator = (const Client & src) {
     if (this != &src) {
+            this->_buff = src._buff;
+
+            this->_req_method = src._req_method;
+            this->_req_path = src._req_path;
+            this->_req_protocol = src._req_protocol;
+            this->_req_host = src._req_host;
+            this->_req_connection = src._req_connection;
+            this->_req_content_type = src._req_content_type;
+            this->_req_content_length = src._req_content_length;
+            this->_req_content = src._req_content;
+            this->_req_num = src._req_num;
+			
+            this->_resp_protocol = src._resp_protocol;
+            this->_resp_status_code = src._resp_status_code;
+            this->_resp_status_txt = src._resp_status_txt;
+            this->_resp_connection = src._resp_connection;
+            this->_resp_content_type = src._resp_content_type;
+            this->_resp_content_length = src._resp_content_length;
+            this->_resp_content = src._resp_content;
+            this->_resp_full_resp_txt = src._resp_full_resp_txt;
+            this->_resp_remained_to_sent = src._resp_remained_to_sent;
+            this->_resp_num = src._resp_num;
     }
     return (*this);
 };
