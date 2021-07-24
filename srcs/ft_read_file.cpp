@@ -5,8 +5,14 @@ int ft_read_file(const char * filename,  std::string & content) {
     std::ifstream ifs;
     std::ofstream ofs;
     std::string tmp;
+    int ret;
 
     content.clear();
+    errno = 0;
+    ret = open(filename, O_WRONLY);
+    if (ret == -1 && errno == EISDIR) {
+        return (0);
+    }
 
     ifs.open(filename); // should be the full paath of the file
     if (!ifs.is_open()) {
