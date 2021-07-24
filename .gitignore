@@ -3,3 +3,4 @@ server
 client
 .vscode
 .DS_Store
+ft_send_response copy 2.cpp

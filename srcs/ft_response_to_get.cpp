@@ -8,6 +8,16 @@ void ft_send_not_found(Client & client);
 void ft_response_to_get(Client & client, Server & server, Location & location) {
     std::string content;
 
+    if (!location.getRedirection().empty()) {
+        client.RespSetProtocol("HTTP/1.1");
+        client.RespSetStatusCode("301");
+        client.RespSetStatusTxt("MOVED\nLocation: https://www.google.com/");
+        
+        std::cout << client.RespCreateFullRespTxt();
+        return ;
+        //  exit(1);
+        // ft_send_not_found(client); return ;
+    }
     ft_get_content_and_content_type(client, server, location, content);
 }
 
@@ -24,7 +34,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();
                 if (!ft_read_file(read_file.c_str(), content)) {
-                    ft_send_not_found(client); ft_create_header("text/html, charset=utf-8", client, content); return ;
+                    ft_send_not_found(client); return ;
                 }
                 else {
                     status_code = server.getDefaultErrorStatusCode();
@@ -32,7 +42,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
             }
         }
         else if (!ft_read_file(read_file.c_str(), content)) {
-            ft_send_not_found(client); ft_create_header("text/html, charset=utf-8", client, content); return ;
+            ft_send_not_found(client); return ;
         }
     }
     if ((pos =read_file.find_last_of(".")) != read_file.npos) {
@@ -111,6 +121,7 @@ void ft_send_not_found(Client & client) {
 	
 	client.RespSetStatusCode("404");
 	client.RespSetStatusTxt("NOT FOUND");
+	client.RespSetContentType("text/html");
 	client.RespSetContentLength(strlen(content));
 	client.RespSetContent(content);
 	
