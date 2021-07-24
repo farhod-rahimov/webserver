@@ -49,7 +49,9 @@ void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
 void	ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlist, \
 					std::vector<struct kevent> & evlist, Server & server);
 
-void	ft_response_to_get(Client & client);
+// void	ft_response_to_get(Client & client);
+void	ft_response_to_get(Client & client, Server & server, Location & location);
+
 void	ft_response_to_post(Client & client);
 void	ft_response_to_delete(Client & client);
 void	ft_create_my_def_response(Client & client);

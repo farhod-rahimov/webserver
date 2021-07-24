@@ -1,14 +1,14 @@
 #include "./headers/Header.hpp"
 
-void ft_get_method(std::string & _req_method, std::string & buf);
-void ft_get_path(std::string & _req_path, std::string & _req_method, std::string & buf);
-void ft_get_protocol(std::string & _req_protocol, std::string & _req_path, std::string & buf);
-void ft_get_host(std::string & _req_host, std::string & buf);
-void ft_get_connection(std::string & _req_connection, std::string & buf);
+static void ft_get_method(std::string & _req_method, std::string & buf);
+static void ft_get_path(std::string & _req_path, std::string & _req_method, std::string & buf);
+static void ft_get_protocol(std::string & _req_protocol, std::string & _req_path, std::string & buf);
+static void ft_get_host(std::string & _req_host, std::string & buf);
+static void ft_get_connection(std::string & _req_connection, std::string & buf);
 
-void ft_get_content_type(std::string & _req_content_type, std::string & buf);
-void ft_get_content_length(Client & client, std::string & buf);
-void ft_get_content(std::string & _req_content, std::string & buf);
+static void ft_get_content_type(std::string & _req_content_type, std::string & buf);
+static void ft_get_content_length(Client & client, std::string & buf);
+static void ft_get_content(std::string & _req_content, std::string & buf);
 
 void ft_parse_request(std::map<int, Client> & clients, int fd) {
     std::string buf = clients[fd].getBuff();

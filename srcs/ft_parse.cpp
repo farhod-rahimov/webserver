@@ -158,6 +158,7 @@ Location ft_get_location_settings(std::string & content_file, size_t start, size
 void ft_get_first_val_before_space(std::string first_field, std::string second_field, std::string & dst, std::string & src) {
     size_t len = 0;
     
+    if (src.length() == 0) {return ;}
     len = ft_skip_notspaces_nottabs_notnewlines(src, 0);
     if (src.find(" ", 0) == src.npos && src.length() > 0) {
         std::cerr << "There should be " << first_field << " before " << second_field << " in location" << std::endl;

@@ -38,6 +38,7 @@ void ft_replace_req_path(std::string & req_path, std::string & location_path, st
 
 int ft_get_method(std::string req_method, std::string supported_methods);
 int ft_check_protocol(std::string req_protocol);
+void ft_set_connection_header(Client & client);
 
 void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server) {
 	int method;
@@ -46,11 +47,14 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	ft_get_responding_server(servers, client, responding_server);
 	ft_get_responding_location(responding_server.getLocations(), responding_location, client.ReqGetPath());
 	ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
-
-	exit(1);
+	ft_set_connection_header(client);
 
 	if (((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0) || ft_check_protocol(client.ReqGetProtocol()) < 0)
 		return (ft_send_not_implemented(client));
+	
+	if (method == 1) {ft_response_to_get(client, responding_server, responding_location);}
+	// else if (method == 2) {ft_response_to_post();}
+	// else if (method == 3) {ft_response_to_delete();}
 
 	exit(1);
 }
@@ -129,7 +133,6 @@ size_t ft_get_max_match(std::string & s1, std::string & s2) {
 
 int ft_get_method(std::string req_method, std::string supported_methods) {
 	if (req_method.find("GET") != req_method.npos && supported_methods.find("GET") != supported_methods.npos) {return (1);}
-	else if (req_method.find("GET") != req_method.npos && supported_methods.length() == 0) {return (1);}
 	else if (req_method.find("POST") != req_method.npos && supported_methods.find("POST") != supported_methods.npos) {return (2);}
 	else if (req_method.find("DELETE") != req_method.npos && supported_methods.find("DELETE") != supported_methods.npos) {return (3);}
 	
