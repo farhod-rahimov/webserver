@@ -5,6 +5,8 @@ void ft_get_content_type(std::string & content_type, std::string & extension);
 void ft_create_header(const char * content_type, Client & client, std::string & content);
 void ft_send_not_found(Client & client);
 
+int ft_show_current_dir_files(Client & client, Location & location, std::string & content);
+
 void ft_response_to_get(Client & client, Server & server, Location & location) {
     std::string content, tmp;
 
@@ -33,7 +35,17 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
             read_file = location.getDefaultFile();
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();
-                if (!ft_read_file(read_file.c_str(), content)) {
+
+                if (!location.getAutoindex().empty()) {
+                    if (ft_show_current_dir_files(client, location, content) == -1) {
+                        ft_send_not_found(client); return ;
+                    }
+                    else {
+                        read_file.clear();
+                        content_type = "text/html";
+                    }
+                }
+                else if (!ft_read_file(read_file.c_str(), content)) {
                     ft_send_not_found(client); return ;
                 }
                 else {
@@ -50,6 +62,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
         std::cout << "extension = " << extension << std::endl;
         ft_get_content_type(content_type, extension);
     }
+    // std::cout << content << "\n"; exit(1);
     ft_create_header(content_type.c_str(), client, content);
     if (status_code.length())
         client.RespGetStatusCode() = status_code;

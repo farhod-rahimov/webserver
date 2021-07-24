@@ -47,6 +47,9 @@ void ft_get_path(std::string & _req_path, std::string & _req_method, std::string
     for (len = ++i; len < buf.size() && buf[len] != ' '; len++) {
     }
     _req_path = buf.substr(i, len - i);
+    for (size_t pos = _req_path.find("%20"); pos != _req_path.npos; pos = _req_path.find("%20")) {
+        _req_path.replace(pos, 3, " ");
+    }
     std::cout << "\nREQ_PATH '" << _req_path << "'\n";
 }
 

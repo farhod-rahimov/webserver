@@ -5,6 +5,7 @@ SRCS =			./srcs/Client.cpp \
 				./srcs/ft_parse.cpp \
 				./srcs/ft_read_file.cpp \
 				./srcs/ft_response_to_get.cpp \
+				./srcs/ft_show_current_dir_files.cpp \
 				./srcs/main.cpp
 
 				# ./srcs/ft_response_to_post.cpp
