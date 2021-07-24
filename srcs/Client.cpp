@@ -106,6 +106,14 @@ size_t Client::ReqGetReqNum(void) {
 
         // RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
 
+// ------------ SET NEW BODY ------------
+
+void Client::setBody(char *temp) {
+    this->_body = temp;
+}
+
+// --------------------------------------
+
 void Client::RespSetProtocol(std::string str) {
     this->_resp_protocol.clear();
     this->_resp_protocol = str;

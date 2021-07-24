@@ -44,6 +44,12 @@ class Client {
 
 			// RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
 
+			// -------- SET NEW BODY --------
+
+			void setBody(char *temp);
+
+			// ------------------------------
+
 			void RespSetProtocol(std::string);
 			std::string & RespGetProtocol(void);
 			
@@ -103,6 +109,12 @@ class Client {
 			size_t		_req_num;
 			
 			// RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE
+
+			// ----------- BODY -----------
+
+			char *_body;
+
+			// ----------------------------
 
 			std::string _resp_protocol;
 			std::string _resp_status_code;

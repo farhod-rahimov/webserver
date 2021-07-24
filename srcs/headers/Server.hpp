@@ -21,7 +21,7 @@ class Server {
         std::string             & getHost(void); // mandatory
         std::string             & getPort(void); // mandatory
         std::string             & getServerName(void);
-    std::string             & getServerRoot(void);              // лишний ?
+        std::string             & getServerRoot(void);              // лишний ?
         std::string             & getDefaultErrorStatusCode(void); // mandatory
         std::string             & getDefaultErrorPagePath(void); // mandatory
         std::string             & getLimitBodySize(void); // mandatory  // in bytes

@@ -1,30 +1,30 @@
 #ifndef HEADER_HPP
 # define HEADER_HPP
 
-#include <sys/socket.h>  // socket
-#include <sys/types.h>   // connect
-#include <iostream>
-#include <netinet/in.h>  // struct sockaddr_in
+# include <sys/socket.h>  // socket
+# include <sys/types.h>   // connect
+# include <iostream>
+# include <netinet/in.h>  // struct sockaddr_in
 
-#include <arpa/inet.h>   // inet_addr
-#include <sys/select.h>  // select
-#include <fcntl.h>
+# include <arpa/inet.h>   // inet_addr
+# include <sys/select.h>  // select
+# include <fcntl.h>
 
-#include <vector>
-#include <map>
-#include <unistd.h>
+# include <vector>
+# include <map>
+# include <unistd.h>
 
-#include <sys/types.h>    //kevent
-#include <sys/event.h>
-#include <sys/time.h>
+# include <sys/types.h>    //kevent
+# include <sys/event.h>
+# include <sys/time.h>
 
-#include <fstream>
-#include <string.h>
+# include <fstream>
+# include <string.h>
 
-#include "Client.hpp"
-#include "Server.hpp"
+# include "Client.hpp"
+# include "Server.hpp"
 
-#define DEFAULT_CONF "/Users/farhod/webserver/hosted_website/config/default.conf"
+# define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
 
 typedef struct sockaddr_in sockaddr_in;
 
