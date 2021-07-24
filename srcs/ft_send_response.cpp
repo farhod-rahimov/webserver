@@ -37,8 +37,8 @@ size_t ft_get_max_match(std::string & s1, std::string & s2);
 void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root);
 void ft_get_location_of_redirected_src(Location & responding_location, Client & client);
 
-int ft_get_method(std::string req_method, std::string supported_methods);
-int ft_check_protocol(std::string req_protocol);
+int ft_get_method(std::string & req_method, std::string & supported_methods);
+int ft_check_protocol(std::string & req_protocol);
 void ft_set_connection_header(Client & client);
 
 void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server) {
@@ -53,7 +53,10 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 		ft_get_location_of_redirected_src(responding_location, client);
 	ft_set_connection_header(client);
 
-	if (((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0) || ft_check_protocol(client.ReqGetProtocol()) < 0)
+	// if (((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0) || ft_check_protocol(client.ReqGetProtocol()) < 0)
+	if ((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0)
+		return (ft_send_not_implemented(client));
+	if (ft_check_protocol(client.ReqGetProtocol()) < 0)
 		return (ft_send_not_implemented(client));
 	
 	if (method == 1) {ft_response_to_get(client, responding_server, responding_location);}
@@ -107,25 +110,34 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 }
 
 void ft_get_location_of_redirected_src(Location & responding_location, Client & client) {
-	std::string location;
-	(void)client;
+	// std::string location;
+	// (void)client;
 	
+	// if (responding_location.getRedirection().back() == '/')
+	// 	responding_location.getRedirection().resize(responding_location.getRedirection().length() - 1);
+	// if (responding_location.getPath().back() == '/')
+		// responding_location.getPath().resize(responding_location.getPath().length() - 1);
+	// location = client.ReqGetPath();
+	// location.replace(0, responding_location.getPath().length(), responding_location.getRedirection());
+	// std::cout << "Location " << location << std::endl;
+
 	if (responding_location.getRedirection().back() == '/')
-		responding_location.getRedirection().resize(responding_location.getRedirection().length() - 1);
+		responding_location.getRedirection().pop_back();
 	if (responding_location.getPath().back() == '/')
-		responding_location.getPath().resize(responding_location.getPath().length() - 1);
-	location = client.ReqGetPath();
-	location.replace(0, responding_location.getPath().length(), responding_location.getRedirection());
-	std::cout << "Location " << location << std::endl;
-	// exit(1);
+		responding_location.getPath().pop_back();
+	client.RespGetLocation() = client.ReqGetPath();
+	std::cout << "1Location " << client.RespGetLocation() << std::endl;
+	client.RespGetLocation().replace(0, responding_location.getPath().length(), responding_location.getRedirection());
+	std::cout << "2Location " << client.RespGetLocation() << std::endl;
+	client.RespSetLocation(client.RespGetLocation());
 };
 
 void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root) {
 	if (location_path.back() == '/') {
-		location_path.resize(location_path.length() - 1);
+		location_path.pop_back();
 	}
 	if (location_root.back() == '/') {
-		location_root.resize(location_root.length() - 1);
+		location_root.pop_back();
 	}
 	req_path.replace(0, location_path.length(), location_root);
 	std::cout << "REQ NEW PATH " << req_path << std::endl;
@@ -149,7 +161,7 @@ size_t ft_get_max_match(std::string & s1, std::string & s2) {
 	return (max);
 }
 
-int ft_get_method(std::string req_method, std::string supported_methods) {
+int ft_get_method(std::string & req_method, std::string & supported_methods) {
 	if (req_method.find("GET") != req_method.npos && supported_methods.find("GET") != supported_methods.npos) {return (1);}
 	else if (req_method.find("POST") != req_method.npos && supported_methods.find("POST") != supported_methods.npos) {return (2);}
 	else if (req_method.find("DELETE") != req_method.npos && supported_methods.find("DELETE") != supported_methods.npos) {return (3);}
@@ -157,7 +169,7 @@ int ft_get_method(std::string req_method, std::string supported_methods) {
 	return (-1);
 }
 
-int ft_check_protocol(std::string req_protocol) {
+int ft_check_protocol(std::string & req_protocol) {
 	if (req_protocol.find("HTTP/1.1") == req_protocol.npos)
 		return (-1);
 	return (1);

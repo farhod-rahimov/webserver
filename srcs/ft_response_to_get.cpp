@@ -11,12 +11,10 @@ void ft_response_to_get(Client & client, Server & server, Location & location) {
     if (!location.getRedirection().empty()) {
         client.RespSetProtocol("HTTP/1.1");
         client.RespSetStatusCode(location.getRedirectionStatusCode());
-        
+        client.RespSetStatusTxt("MOVED");
         if (location.getRedirection().back() == '/')
-            location.getRedirection().resize(location.getRedirection().length() - 1);
-        location.getRedirection().append(location.getPath());
-        tmp = "MOVED\nLocation: "; tmp += location.getRedirection();
-        client.RespSetStatusTxt(tmp);
+            location.getRedirection().pop_back();
+
         std::cout << client.RespCreateFullRespTxt();
         return ;
     }

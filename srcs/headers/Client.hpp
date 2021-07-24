@@ -76,6 +76,9 @@ class Client {
 			void RespSetConnection(std::string);
 			std::string & RespGetConnection(void);
 
+			void RespSetLocation(std::string);
+			std::string & RespGetLocation(void);
+
 			// COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON	|	COMMON
 			
 			std::string & getBuff(void);
@@ -108,6 +111,7 @@ class Client {
 			std::string _resp_status_txt;
 			
 			std::string _resp_connection;
+			std::string _resp_location;
 			
 			std::string _resp_content_type;
 			// size_t		_resp_content_length;
