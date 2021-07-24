@@ -61,7 +61,7 @@ void ft_parse(std::vector<Server> & servers, const char *conf_file) {
     ft_get_servers(content_file, num_servers, servers);
     
     
-    ft_print_result(servers); //delete
+    // ft_print_result(servers); //delete
     // exit(1);
 }
 
@@ -150,14 +150,15 @@ Location ft_get_location_settings(std::string & content_file, size_t start, size
     ft_get_first_val_before_space("'cgi extension'", "'cgi path'", l.getCgiExtension(), l.getCgiPath());
     ft_get_first_val_before_space("'redirection status code'", "'redirection address'", l.getRedirectionStatusCode(), l.getRedirection());
 
-    std::string print_values[10] = {l.getAllowedMethods(), l.getRedirectionStatusCode(), l.getRedirection(), l.getPath(), l.getDefaultFile(), \
-                                    l.getCgiExtension(), l.getCgiPath(), l.getLocationRoot(), l.getUploadDirectory(), l.getAutoindex()};
+    // std::string print_values[10] = {l.getAllowedMethods(), l.getRedirectionStatusCode(), l.getRedirection(), l.getPath(), l.getDefaultFile(), \
+    //                                 l.getCgiExtension(), l.getCgiPath(), l.getLocationRoot(), l.getUploadDirectory(), l.getAutoindex()};
     return (l);
 }
 
 void ft_get_first_val_before_space(std::string first_field, std::string second_field, std::string & dst, std::string & src) {
     size_t len = 0;
     
+    if (src.length() == 0) {return ;}
     len = ft_skip_notspaces_nottabs_notnewlines(src, 0);
     if (src.find(" ", 0) == src.npos && src.length() > 0) {
         std::cerr << "There should be " << first_field << " before " << second_field << " in location" << std::endl;

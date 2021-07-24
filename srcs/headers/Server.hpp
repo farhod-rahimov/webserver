@@ -18,6 +18,7 @@ class Server {
         
         Server & operator = (const Server & src);
 
+        bool                    & getCheckFlag(void);
         std::string             & getHost(void); // mandatory
         std::string             & getPort(void); // mandatory
         std::string             & getServerName(void);
@@ -30,6 +31,7 @@ class Server {
         std::map<int, Client>   & getClients(void);
 
     private:
+        bool                    _check_flag;
         std::string             _host;
         std::string             _port;
         std::string             _server_name;
