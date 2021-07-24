@@ -6,17 +6,19 @@ void ft_create_header(const char * content_type, Client & client, std::string & 
 void ft_send_not_found(Client & client);
 
 void ft_response_to_get(Client & client, Server & server, Location & location) {
-    std::string content;
+    std::string content, tmp;
 
     if (!location.getRedirection().empty()) {
         client.RespSetProtocol("HTTP/1.1");
-        client.RespSetStatusCode("301");
-        client.RespSetStatusTxt("MOVED\nLocation: https://www.google.com/");
+        client.RespSetStatusCode(location.getRedirectionStatusCode());
         
+        if (location.getRedirection().back() == '/')
+            location.getRedirection().resize(location.getRedirection().length() - 1);
+        location.getRedirection().append(location.getPath());
+        tmp = "MOVED\nLocation: "; tmp += location.getRedirection();
+        client.RespSetStatusTxt(tmp);
         std::cout << client.RespCreateFullRespTxt();
         return ;
-        //  exit(1);
-        // ft_send_not_found(client); return ;
     }
     ft_get_content_and_content_type(client, server, location, content);
 }

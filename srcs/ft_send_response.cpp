@@ -35,6 +35,7 @@ void ft_get_responding_server(std::vector<Server> & servers, Client & client, Se
 void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path);
 size_t ft_get_max_match(std::string & s1, std::string & s2);
 void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root);
+void ft_get_location_of_redirected_src(Location & responding_location, Client & client);
 
 int ft_get_method(std::string req_method, std::string supported_methods);
 int ft_check_protocol(std::string req_protocol);
@@ -46,7 +47,10 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	
 	ft_get_responding_server(servers, client, responding_server);
 	ft_get_responding_location(responding_server.getLocations(), responding_location, client.ReqGetPath());
-	ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
+	if (responding_location.getRedirection().empty())
+		ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
+	else
+		ft_get_location_of_redirected_src(responding_location, client);
 	ft_set_connection_header(client);
 
 	if (((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0) || ft_check_protocol(client.ReqGetProtocol()) < 0)
@@ -101,6 +105,20 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 	}
 	responding_location = locations[idx];
 }
+
+void ft_get_location_of_redirected_src(Location & responding_location, Client & client) {
+	std::string location;
+	(void)client;
+	
+	if (responding_location.getRedirection().back() == '/')
+		responding_location.getRedirection().resize(responding_location.getRedirection().length() - 1);
+	if (responding_location.getPath().back() == '/')
+		responding_location.getPath().resize(responding_location.getPath().length() - 1);
+	location = client.ReqGetPath();
+	location.replace(0, responding_location.getPath().length(), responding_location.getRedirection());
+	std::cout << "Location " << location << std::endl;
+	// exit(1);
+};
 
 void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root) {
 	if (location_path.back() == '/') {
