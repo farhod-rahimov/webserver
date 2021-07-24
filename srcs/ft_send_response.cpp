@@ -34,7 +34,7 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
 void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path);
 size_t ft_get_max_match(std::string & s1, std::string & s2);
-void ft_replace_req_path(std::string & req_path, std::string location_path, std::string location_root);
+void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root);
 
 int ft_get_method(std::string req_method, std::string supported_methods);
 int ft_check_protocol(std::string req_protocol);
@@ -98,7 +98,7 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 	responding_location = locations[idx];
 }
 
-void ft_replace_req_path(std::string & req_path, std::string location_path, std::string location_root) {  // !! location_root не принимай по ссылке
+void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root) {
 	if (location_path.back() == '/') {
 		location_path.resize(location_path.length() - 1);
 	}
