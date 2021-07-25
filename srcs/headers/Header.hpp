@@ -10,38 +10,29 @@
 # include <sys/select.h>  // select
 # include <fcntl.h>
 
-<<<<<<< HEAD
 # include <vector>
 # include <map>
 # include <unistd.h>
-=======
 #include <vector>
 #include <string>
 #include <map>
 #include <unistd.h>
->>>>>>> ab236cabeb92d413a9469bf22c461c5cede8413c
 
 # include <sys/types.h>    //kevent
 # include <sys/event.h>
 # include <sys/time.h>
 
-<<<<<<< HEAD
 # include <fstream>
 # include <string.h>
-=======
 #include <fstream>
->>>>>>> ab236cabeb92d413a9469bf22c461c5cede8413c
 
 # include "Client.hpp"
 # include "Server.hpp"
 
-<<<<<<< HEAD
-# define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
-=======
+// # define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
 #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
 // std::vector<Server>	servers;
->>>>>>> ab236cabeb92d413a9469bf22c461c5cede8413c
 
 typedef struct sockaddr_in sockaddr_in;
 

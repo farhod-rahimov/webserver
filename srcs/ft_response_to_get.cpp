@@ -36,7 +36,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();
 
-                if (!location.getAutoindex().empty()) {
+                if (location.getAutoindex().find("on") != location.getAutoindex().npos) {
                     if (ft_show_current_dir_files(client, location, content) == -1) {
                         ft_send_not_found(client); return ;
                     }
