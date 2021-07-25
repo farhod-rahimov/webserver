@@ -108,8 +108,10 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 				// exit(EXIT_FAILURE);
 			}
 			buf[ret] = '\0';
-            clients[fd].getBuff().append(buf);
-			std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+			for (int i = 0; i < ret; i++) {
+				clients[fd].getBuff().push_back(buf[i]);
+			}
+			// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
     }
 	if (ft_check_end_request(clients[fd].getBuff()) == true){
 
