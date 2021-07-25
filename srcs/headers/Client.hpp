@@ -43,11 +43,15 @@ class Client {
 
 			// RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
 
-			// -------- SET NEW BODY --------
+			// ------------ BODY/CGI_HEADER ------------
 
-			void setBody(char *temp);
+			char *getCgiBody();
+			void setCgiBody(char *temp);
 
-			// ------------------------------
+			void setCgiHeader(std::string value);
+			std::string getCgiHeader();
+			
+			// -----------------------------------------
 
 			void RespSetProtocol(std::string);
 			std::string & RespGetProtocol(void);
@@ -112,11 +116,12 @@ class Client {
 			
 			// RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE
 
-			// ----------- BODY -----------
+			// ----------- BODY/CGI_HEADER -----------
 
-			char *_body;
+			char *_cgiBody;
+			std::string _cgiHeader;
 
-			// ----------------------------
+			// ---------------------------------------
 
 			std::string _resp_protocol;
 			std::string _resp_status_code;

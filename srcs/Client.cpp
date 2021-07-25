@@ -131,13 +131,19 @@ size_t Client::ReqGetReqNum(void) {
 
         // RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
 
-// ------------ SET NEW BODY ------------
+// ------------ BODY/CGI_HEADER ------------
 
-void Client::setBody(char *temp) {
-    this->_body = temp;
+void Client::setCgiBody(char *temp) { this->_cgiBody = temp; }
+
+char *Client::getCgiBody() { return this->_cgiBody; }
+
+void Client::setCgiHeader(std::string value) {
+    this->_cgiHeader = value;
 }
 
-// --------------------------------------
+std::string Client::getCgiHeader() { return this->_cgiHeader; }
+
+// -----------------------------------------
 
 void Client::RespSetProtocol(std::string str) {
     // this->_resp_protocol.clear();

@@ -31,7 +31,7 @@ void CGI::setEnvironment() {
 	env["GATEWAY_INTERFACE"] = "CGI/1.1";
 	env["PATH_INFO"] = _client->ReqGetPath();
 	env["PATH_TRANSLATED"] = _client->ReqGetPath();
-	env["QUERY_STRING"] = _client->ReqGetPath() + "?" + _queryString;
+	env["QUERY_STRING"] = _queryString;
 	env["REMOTE_ADDR"] = _server->getHost();
 	env["REMOTE_IDENT"] = "basic";
 	env["REMOTE_USER"] = "basic";
@@ -95,7 +95,7 @@ void CGI::clean() {
 	}
 }
 
-char **CGI::getEnvironment() const {return _environment;}
+char **CGI::getEnvironment() const { return _environment; }
 
 void	CGI::executeCGI() {
 
@@ -106,7 +106,7 @@ void	CGI::executeCGI() {
 	std::string newBody;
 
 	if ((savedFd[IN] = dup(STDIN_FILENO)) == -1 || (savedFd[OUT] = dup(STDOUT_FILENO)) == -1)
-		throw std::runtime_error(RED + std::string("Can't create file descriptor") + RESET);;
+		throw std::runtime_error(RED + std::string("Can't create file descriptor") + RESET);
 	if (!(file[IN] = tmpfile()) || !(file[OUT] = tmpfile()))
 		throw std::runtime_error(RED + std::string("Can't create temporary file") + RESET);
 	if ((fd[IN] = fileno(file[IN])) == -1 || (fd[OUT] = fileno(file[OUT])) == -1)
@@ -160,13 +160,14 @@ void	CGI::executeCGI() {
 			_client->RespSetStatusCode(_clientHeader.substr(8, 3).c_str());
 		if ((pos = _clientHeader.find("Content-Type: ", 0)) != std::string::npos)
 			_client->ReqSetContentType(_clientHeader.substr(pos + 14, 24));
-		// _client->setCgiHeader(_clientHeader); // ---------------------------------------------- ?????????????????????????????????????? cgi header
+
+		_client->setCgiHeader(_clientHeader);
+
 		_client->RespSetContentLength((size_t)_bodySize - _clientHeader.size());
 	}
-    // char *temp = (char *)malloc(sizeof(char) * newBody.size());
-	char *temp = new char[newBody.size()];
+	char *temp = new char(newBody.size());
     for (size_t i = 0; i < newBody.size(); ++i) {
         temp[i] = newBody[i];
     }
-	_client->setBody(temp);
+	_client->setCgiBody(temp);
 }
