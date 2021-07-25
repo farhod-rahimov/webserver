@@ -1,6 +1,7 @@
 #ifndef HEADER_HPP
 # define HEADER_HPP
 
+<<<<<<< HEAD
 #include <sys/socket.h>  // socket
 #include <sys/types.h>   // connect
 #include <iostream>
@@ -10,6 +11,20 @@
 #include <sys/select.h>  // select
 #include <fcntl.h>
 
+=======
+# include <sys/socket.h>  // socket
+# include <sys/types.h>   // connect
+# include <iostream>
+# include <netinet/in.h>  // struct sockaddr_in
+
+# include <arpa/inet.h>   // inet_addr
+# include <sys/select.h>  // select
+# include <fcntl.h>
+
+# include <vector>
+# include <map>
+# include <unistd.h>
+>>>>>>> 042d8495e479edd1e8d38412756263938855d33f
 #include <vector>
 #include <string>
 #include <map>
@@ -19,12 +34,22 @@
 #include <sys/event.h>
 #include <sys/time.h>
 
+<<<<<<< HEAD
+=======
+# include <fstream>
+# include <string.h>
+>>>>>>> 042d8495e479edd1e8d38412756263938855d33f
 #include <fstream>
 
 #include "Client.hpp"
 #include "Server.hpp"
 
+<<<<<<< HEAD
 #define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
+=======
+// # define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
+#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
+>>>>>>> 042d8495e479edd1e8d38412756263938855d33f
 
 // std::vector<Server>	servers;
 
@@ -39,6 +64,7 @@ bool	ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 								std::vector<struct kevent> & evlist, std::map<int, Client> & clients);
 
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
+void	ft_parse_request(std::map<int, Client> & clients, int fd);
 
 void    ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers);
 void    ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server);
@@ -52,7 +78,9 @@ void	ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 // void	ft_response_to_get(Client & client);
 void	ft_response_to_get(Client & client, Server & server, Location & location);
 
-void	ft_response_to_post(Client & client);
+// void	ft_response_to_post(Client & client);
+void	ft_response_to_post(Client & client, Server & server, Location & location);
+
 void	ft_response_to_delete(Client & client);
 void	ft_create_my_def_response(Client & client);
 

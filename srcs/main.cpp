@@ -1,5 +1,5 @@
 #include "./headers/Header.hpp"
-#define BUFFER_SIZE 1000 // get - макс 2048 байт
+#define BUFFER_SIZE 100 // get - макс 2048 байт
 
 std::vector<Server>	servers;
 
@@ -95,7 +95,7 @@ bool ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 
 void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<struct kevent> & evlist, Server & server) {
 	char buf[BUFFER_SIZE + 1];
-	int ret;
+	int ret = BUFFER_SIZE + 1;
 	
 	std::map<int, Client> & clients = server.getClients();
     (void)chlist;
@@ -109,8 +109,10 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			}
 			buf[ret] = '\0';
             clients[fd].getBuff().append(buf);
+			std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
     }
-    if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
+    if (ret < BUFFER_SIZE) {
+    // if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
                     /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
         ft_parse_request(clients, fd);
         ft_send_response(server, fd, chlist, servers);

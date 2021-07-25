@@ -94,6 +94,14 @@ std::string & Client::ReqGetConnection(void) {
     return (this->_req_connection);
 };
 
+void Client::ReqSetContentFileName(std::string str) {
+    this->_req_content_file_name = str;
+};
+
+std::string & Client::ReqGetContentFileName(void) {
+    return (this->_req_content_file_name);
+};
+
 void Client::ReqSetContentType(std::string str) {
     // this->_req_content_type.clear();
     this->_req_content_type = str;

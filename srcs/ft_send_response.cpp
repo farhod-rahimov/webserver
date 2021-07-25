@@ -60,7 +60,7 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 		return (ft_send_not_implemented(client));
 	
 	if (method == 1) {ft_response_to_get(client, responding_server, responding_location);}
-	// else if (method == 2) {ft_response_to_post();}
+	else if (method == 2) {ft_response_to_post(client, responding_server, responding_location);}
 	// else if (method == 3) {ft_response_to_delete();}
 
 	// exit(1);
@@ -97,7 +97,7 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 			idx = i;
 		}
 	}
-	std::cout << "MAX_MATCH " << max_match << "\n";
+	// std::cout << "MAX_MATCH " << max_match << "\n";
 	if (max_match == 0) {
 		for (size_t i = 0; i < locations.size(); i++) {
 			if (locations[i].getPath().length() == 1) {
@@ -147,7 +147,7 @@ size_t ft_get_max_match(std::string & s1, std::string & s2) {
 	size_t pos1 = 0, pos2 = 0, max = 0;
 	std::string tmp1, tmp2;
 
-	std::cout << "THIS " << s1 << "\n";
+	// std::cout << "THIS " << s1 << "\n";
 	for (; ;) {
 		if ((pos1 = s1.find("/", pos1)) == s1.npos)
 			return (max);
