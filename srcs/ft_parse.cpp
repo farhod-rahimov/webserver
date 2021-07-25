@@ -143,7 +143,7 @@ Location ft_get_location_settings(std::string & content_file, size_t start, size
         ft_get_value(content_file, pos + str_fields[i].length(), str_values[i], str_fields[i]);
     }
 
-    if (!l.getRedirection().length() && !l.getLocationRoot().length()) {
+    if (!l.getRedirection().length() && !l.getLocationRoot().length() && l.getAllowedMethods().find("POST") == l.getAllowedMethods().npos) {
         std::cerr << "There should be at least one field in location. 'location root: ' or 'redirection: ''" << std::endl; exit(EXIT_FAILURE);
     }
 

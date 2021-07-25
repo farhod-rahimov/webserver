@@ -1,6 +1,7 @@
 #include "./headers/Header.hpp"
 
 void ft_save_file(Client & client, Location & location);
+void ft_work_with_cgi(Client & client, Server & server, Location & location);
 
 void	ft_response_to_post(Client & client, Server & server, Location & location) {
     (void)client;
@@ -11,10 +12,9 @@ void	ft_response_to_post(Client & client, Server & server, Location & location) 
         (client.ReqGetPath().find("?") != client.ReqGetPath().npos)) {
             if (location.getCgiPath().empty()) {
                 // cgi path doesnt exist return correct error page (not implemented??)
-                
                 return ;
             }
-            // ft_work_with_cgi();
+            ft_work_with_cgi(client, server, location);
     }
     ft_save_file(client, location);
 }
@@ -35,4 +35,10 @@ void ft_save_file(Client & client, Location & location) {
         ofs << client.ReqGetContent();
         ofs.close();
     }
+}
+
+void ft_work_with_cgi(Client & client, Server & server, Location & location) {
+    CGI cgi_var;
+
+    cgi_var.init(&server, &client, location.getCgiPath().c_str());
 }

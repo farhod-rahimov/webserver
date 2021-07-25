@@ -1,7 +1,6 @@
 #ifndef HEADER_HPP
 # define HEADER_HPP
 
-<<<<<<< HEAD
 #include <sys/socket.h>  // socket
 #include <sys/types.h>   // connect
 #include <iostream>
@@ -11,7 +10,6 @@
 #include <sys/select.h>  // select
 #include <fcntl.h>
 
-=======
 # include <sys/socket.h>  // socket
 # include <sys/types.h>   // connect
 # include <iostream>
@@ -24,7 +22,6 @@
 # include <vector>
 # include <map>
 # include <unistd.h>
->>>>>>> 042d8495e479edd1e8d38412756263938855d33f
 #include <vector>
 #include <string>
 #include <map>
@@ -34,22 +31,17 @@
 #include <sys/event.h>
 #include <sys/time.h>
 
-<<<<<<< HEAD
-=======
 # include <fstream>
 # include <string.h>
->>>>>>> 042d8495e479edd1e8d38412756263938855d33f
 #include <fstream>
 
 #include "Client.hpp"
 #include "Server.hpp"
 
-<<<<<<< HEAD
-#define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
-=======
-// # define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
+#include "cgi.hpp"
+
+// #define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
 #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
->>>>>>> 042d8495e479edd1e8d38412756263938855d33f
 
 // std::vector<Server>	servers;
 

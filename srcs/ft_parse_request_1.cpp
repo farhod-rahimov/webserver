@@ -16,8 +16,8 @@ std::string ft_get_file_name(std::string & str, size_t pos);
 void ft_parse_request(std::map<int, Client> & clients, int fd) {
     std::string buf = clients[fd].getBuff();
 
-    std::cout << "\nCAME REQUEST\n";
-    std::cout << "'" << buf << "'";
+    // std::cout << "\nCAME REQUEST\n";
+    // std::cout << "'" << buf << "'";
     ft_get_method(clients[fd].ReqGetMethod(), buf);
     ft_get_path(clients[fd].ReqGetPath(), clients[fd].ReqGetMethod(), buf);
     ft_get_protocol(clients[fd].ReqGetProtocol(), clients[fd].ReqGetPath(), buf);
