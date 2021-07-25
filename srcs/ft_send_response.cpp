@@ -22,7 +22,7 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
     
 	ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
 	// if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
-	// std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
+	std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
 	
 	if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
 		size_t i = 0;
