@@ -41,7 +41,7 @@
 #include "cgi.hpp"
 
 // #define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
-#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
+#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default_works.conf"
 
 // std::vector<Server>	servers;
 
@@ -83,4 +83,27 @@ void	ft_create_header(const char * content_type, Client & client, std::string & 
 
 void	ft_parse(std::vector<Server> & servers, const char *conf_file);
 
+bool	ft_check_end_request(std::string & buf);
+
+void	ft_send_not_implemented(Client & client);
+
 #endif
+
+
+// ------WebKitFormBoundary733G5uZa0AHSReD8
+// Content-Disposition: form-data; name="file"; filename="PLAY_ME.url"
+// Content-Type: application/octet-stream
+
+// [InternetShortcut]
+// URL=https://www.youtube.com/watch?v=a14XiTXjOow&list=PLVQYiy6xNUxxd5TiZL87_v6JOx61umsUz
+
+// ------WebKitFormBoundary733G5uZa0AHSReD8--
+
+// ------WebKitFormBoundary733G5uZa0AHSReD8
+// Content-Disposition: form-data; name="file"; filename="PLAY_ME.url"
+// Content-Type: application/octet-stream
+
+// [InternetShortcut]
+// URL=https://www.youtube.com/watch?v=a14XiTXjOow&list=PLVQYiy6xNUxxd5TiZL87_v6JOx61umsUz
+
+// ------WebKitFormBoundary733G5uZa0AHSReD8--

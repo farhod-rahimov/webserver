@@ -8,6 +8,7 @@ SRCS =			./srcs/Client.cpp \
 				./srcs/ft_response_to_get.cpp \
 				./srcs/ft_response_to_post.cpp \
 				./srcs/ft_show_current_dir_files.cpp \
+				./srcs/ft_check_end_request.cpp \
 				./srcs/main.cpp
 
 				# ./srcs/ft_response_to_post.cpp
