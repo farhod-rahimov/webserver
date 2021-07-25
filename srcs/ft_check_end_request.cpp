@@ -45,7 +45,6 @@ bool ft_check_body_end(std::string & buf, size_t first_dclrf) {
     txt_len = buf.substr(con_len - len, len);
     con_len = std::atoi(txt_len.c_str());
     std::cout << "CON_LEN " << con_len << std::endl;
-    // exit(1);
     if (con_len == ft_count_body_length(buf, first_dclrf))
         return (true);
     return (false);
@@ -55,6 +54,5 @@ size_t ft_count_body_length(std::string & buf, size_t first_dclrf) {
     size_t len = buf.size() - first_dclrf;
     
     std::cout << "LEN " << len << std::endl;
-    // exit(1);
     return (len);
 }

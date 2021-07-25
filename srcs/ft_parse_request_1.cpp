@@ -140,7 +140,7 @@ void ft_get_content(std::string & _req_content, std::string & buf) {
     if (c_len != buf.npos && i != buf.npos && i < buf.size()) {
         _req_content = buf.substr(i);
     }
-    std::cout << "\nREQ_Content '" << _req_content << "'\n";
+    // std::cout << "\nREQ_Content '" << _req_content << "'\n";
 };
 
 void ft_get_new_content(std::string & _req_content, std::string & buf);
@@ -178,5 +178,5 @@ void ft_get_new_content(std::string & _req_content, std::string & buf) {
     if (end != buf.npos) {
         _req_content = buf.substr(0, end);
     }
-    std::cout << "\nREQ_NEW_Content '" << _req_content << "'\n";
+    // std::cout << "\nREQ_NEW_Content '" << _req_content << "'\n";
 }
