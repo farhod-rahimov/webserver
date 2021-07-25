@@ -173,9 +173,10 @@ std::string ft_get_file_name(std::string & str, size_t pos) {
 }
 
 void ft_get_new_content(std::string & _req_content, std::string & buf) {
-    size_t end = buf.find("\r\n");
+    size_t end = buf.rfind("\r\n");
 
     if (end != buf.npos) {
+        for (; buf[end - 1] != '\n'; end--) {}
         _req_content = buf.substr(0, end);
     }
     // std::cout << "\nREQ_NEW_Content '" << _req_content << "'\n";
