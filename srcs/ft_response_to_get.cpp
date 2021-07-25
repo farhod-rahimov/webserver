@@ -59,7 +59,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
     }
     if ((pos =read_file.find_last_of(".")) != read_file.npos) {
         extension =  read_file.substr(++pos);
-        std::cout << "extension = " << extension << std::endl;
+        // std::cout << "extension = " << extension << std::endl;
         ft_get_content_type(content_type, extension);
     }
     // std::cout << content << "\n"; exit(1);

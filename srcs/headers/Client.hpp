@@ -28,7 +28,10 @@ class Client {
 			
 			void ReqSetConnection(std::string);
 			std::string & ReqGetConnection(void);
-			
+
+			void ReqSetContentFileName(std::string);
+			std::string & ReqGetContentFileName(void);
+
 			void ReqSetContentType(std::string);
 			std::string & ReqGetContentType(void);
 			
@@ -104,6 +107,8 @@ class Client {
 			std::string _req_host;
 			std::string _req_connection;
 			
+			
+			std::string _req_content_file_name;
 			std::string _req_content_type;
 			size_t		_req_content_length;
 			std::string _req_content;
