@@ -2,6 +2,8 @@
 
 std::vector<Server>	servers;
 
+int kq;
+
 int ft_socket_init(Server & server, int opt) {
 	int         socket_fd;
 	sockaddr_in addr;
@@ -115,21 +117,25 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 		// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
 		if (ft_check_end_request(clients[fd].getBuff()) == true) {
 			for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
-			EV_SET(&chlist[i], fd, EVFILT_READ, EV_CLEAR, 0, 0, 0);
-			EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
+			struct kevent tmp;
+			EV_SET(&tmp, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
+			kevent(kq, &tmp, 1, NULL, 0, NULL);
+			// EV_SET(&chlist[i], fd, EVFILT_READ, EV_CLEAR, 0, 0, 0);
+			// EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
 	        ft_parse_request(clients, fd);
         	clients[fd].getBuff().clear();
 			ft_create_response(clients[fd], servers, server, fd);
 		}
-			
     }
+	std::cout << "																			ALKSMCLKASMCLKSAMCSKALCMSALKCMLAKSMCAS\n";
+	std::cout << EVFILT_READ << " " << EVFILT_WRITE << " " << evlist[i].filter << "\n";
 	if (evlist[i].filter == EVFILT_WRITE && clients[fd].RespGetRemainedToSent() > 0) {
 
     // if (ret < BUFFER_SIZE) {
     // if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
                     /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
         // ft_parse_request(clients, fd);
-        ft_send_response(server, fd, chlist, servers);
+        ft_send_response(server, fd, chlist, servers, kq);
         // clients[fd].getBuff().clear();
     }
 }
@@ -153,7 +159,8 @@ void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 
 
 int main(int argc, char **argv) {
-	int					kq, nev;
+	// int					kq, nev;
+	int					nev;
 	
 	if (argc == 1) {ft_parse(servers, DEFAULT_CONF);}
 	else {ft_parse(servers, argv[1]);}
@@ -174,7 +181,8 @@ int main(int argc, char **argv) {
 	}
 	
 	while (1) {
-		nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), chlist.size(), NULL);
+		evlist.reserve(chlist.size() * 2);
+		nev = kevent(kq, &chlist.front(), chlist.size(), &evlist.front(), evlist.capacity(), NULL);
 		
 		if (nev < 0) {
 			std::cout << "kevent ERROR\n"; exit(EXIT_FAILURE);

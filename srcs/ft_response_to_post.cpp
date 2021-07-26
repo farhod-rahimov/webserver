@@ -3,6 +3,7 @@
 void ft_save_file(Client & client, Location & location);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
 std::string ft_get_req_path_extension(Client & client);
+void ft_send_file_was_created(Client & client);
 
 void	ft_response_to_post(Client & client, Server & server, Location & location, int fd) {
     std::string req_path_extension;
@@ -13,6 +14,7 @@ void	ft_response_to_post(Client & client, Server & server, Location & location, 
         return ;
     }
     ft_save_file(client, location);
+    ft_send_file_was_created(client);
 }
 
 void ft_save_file(Client & client, Location & location) {
@@ -55,4 +57,16 @@ std::string ft_get_req_path_extension(Client & client) {
     ext = ext.substr(0, i);
     std::cout << "EXT = " << ext << "\n";
     return (ext);
+}
+
+void ft_send_file_was_created(Client & client) {
+	const char * content = "<html>\nYour file was created. It is here <p><a href=\"/uploaded_files\">Your file</a></p>\n</html>";
+	
+	client.RespSetStatusCode("201");
+	client.RespSetStatusTxt("CREATED");
+	client.RespSetContentType("text/html");
+	client.RespSetContentLength(strlen(content));
+	client.RespSetContent(content);
+	
+	client.RespCreateFullRespTxt();	
 }

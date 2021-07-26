@@ -63,7 +63,7 @@ bool	ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 
-void    ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers);
+void    ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers, int kq);
 void    ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server, int fd);
 
 void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \

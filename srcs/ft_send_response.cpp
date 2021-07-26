@@ -18,7 +18,7 @@ void send_or_not() {
 
 }
 
-void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers) {
+void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers, int kq) {
 	int ret = 0;
 	size_t i = 0;
 	(void)ret;
@@ -37,8 +37,11 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 	
 	if (clients[fd].RespGetRemainedToSent() <= 0) {
 		for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
-		EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_CLEAR, 0, 0, 0);
-		EV_SET(&chlist[i], fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+		struct kevent tmp;
+		EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+		kevent(kq, &tmp, 1, NULL, 0, NULL);
+		// EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_CLEAR, 0, 0, 0);
+		// EV_SET(&chlist[i], fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
 			size_t i = 0;
 			for (; i < chlist.size() && chlist[i].ident != fd; i++) {}
