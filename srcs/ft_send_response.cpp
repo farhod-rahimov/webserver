@@ -18,11 +18,11 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 	int ret;
 	(void)ret;
 	std::map<int, Client> & clients = server.getClients();
-	ft_create_response(clients[fd], servers, server);
+	ft_create_response(clients[fd], servers, server, fd);
     
 	ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
 	// if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
-	// std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
+	std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
 	
 	if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
 		size_t i = 0;
@@ -41,7 +41,7 @@ int ft_get_method(std::string & req_method, std::string & supported_methods);
 int ft_check_protocol(std::string & req_protocol);
 void ft_set_connection_header(Client & client);
 
-void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server) {
+void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server, int fd) {
 	int method;
 	Location responding_location;
 	
@@ -59,8 +59,8 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	if (ft_check_protocol(client.ReqGetProtocol()) < 0)
 		return (ft_send_not_implemented(client));
 	
-	if (method == 1) {ft_response_to_get(client, responding_server, responding_location);}
-	else if (method == 2) {ft_response_to_post(client, responding_server, responding_location);}
+	if (method == 1) {ft_response_to_get(client, responding_server, responding_location, fd);}
+	else if (method == 2) {ft_response_to_post(client, responding_server, responding_location, fd);}
 	// else if (method == 3) {ft_response_to_delete();}
 
 	// exit(1);

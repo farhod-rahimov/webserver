@@ -7,8 +7,19 @@ void ft_send_not_found(Client & client);
 
 int ft_show_current_dir_files(Client & client, Location & location, std::string & content);
 
-void ft_response_to_get(Client & client, Server & server, Location & location) {
+void ft_response_to_get(Client & client, Server & server, Location & location, int fd) {
     std::string content, tmp;
+
+    (void)fd;
+    
+    std::string req_path_extension;
+    req_path_extension = ft_get_req_path_extension(client);
+    std::cout << req_path_extension;
+    if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
+    	// std::cout << "																				ALKLKAMDCKLMADSKLCMDALKCMAKLDMC\n";
+        ft_work_with_cgi(client, server, location, fd);
+        return ;
+    }
 
     if (!location.getRedirection().empty()) {
         client.RespSetProtocol("HTTP/1.1");
@@ -26,12 +37,17 @@ void ft_response_to_get(Client & client, Server & server, Location & location) {
 void ft_get_content_and_content_type(Client & client, Server & server, Location & location, std::string & content) {
     std::string content_type, extension, read_file = client.ReqGetPath();
     size_t pos;
+    std::string req_path = client.ReqGetPath();
+    std::string location_root = location.getLocationRoot();
+
+    if (req_path.back() != '/') {req_path.append("/");}
+    if (location_root.back() != '/') {location_root.append("/");}
 
     std::string status_code;
 
     if (!ft_read_file(read_file.c_str(), content)) {
         read_file = server.getDefaultErrorPagePath();
-        if (errno == EISDIR && client.ReqGetPath() == location.getLocationRoot()) { // is directory
+        if (errno == EISDIR && req_path == location_root) { // is directory
             read_file = location.getDefaultFile();
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();

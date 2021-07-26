@@ -1,20 +1,17 @@
 #include "./headers/Header.hpp"
 
 void ft_save_file(Client & client, Location & location);
-void ft_work_with_cgi(Client & client, Server & server, Location & location);
+void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
+std::string ft_get_req_path_extension(Client & client);
 
-void	ft_response_to_post(Client & client, Server & server, Location & location) {
-    (void)client;
-    (void)server;
-    (void)location;
+void	ft_response_to_post(Client & client, Server & server, Location & location, int fd) {
+    std::string req_path_extension;
 
-    if ((client.ReqGetContent().find("?") != client.ReqGetContent().npos && client.ReqGetContentFileName().empty()) || \
-        (client.ReqGetPath().find("?") != client.ReqGetPath().npos)) {
-            if (location.getCgiPath().empty()) {
-                // cgi path doesnt exist return correct error page (not implemented??)
-                return ;
-            }
-            ft_work_with_cgi(client, server, location);
+    req_path_extension = ft_get_req_path_extension(client);
+    if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
+
+        ft_work_with_cgi(client, server, location, fd);
+        return ;
     }
     ft_save_file(client, location);
 }
@@ -37,8 +34,26 @@ void ft_save_file(Client & client, Location & location) {
     }
 }
 
-void ft_work_with_cgi(Client & client, Server & server, Location & location) {
-    CGI cgi_var;
+void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd) {
+    Cgi cgi(client, server, location, fd);
 
-    cgi_var.init(&server, &client, location.getCgiPath().c_str());
+    cgi.cgiInit();
+}
+
+std::string ft_get_req_path_extension(Client & client) {
+    std::string ext;
+    size_t i = 0;
+    size_t pos = client.ReqGetPath().rfind(".");
+
+    if (pos != std::string::npos) {
+        ext = client.ReqGetPath().substr(pos);
+        if (ext.back() == '/')
+            ext.pop_back();
+    }
+    if (ext[i] == '.')
+        i++;
+    for (; ext[i] >= 'a' && ext[i] <= 'z'; i++) {}
+    ext = ext.substr(0, i);
+    std::cout << "EXT = " << ext << "\n";
+    return (ext);
 }

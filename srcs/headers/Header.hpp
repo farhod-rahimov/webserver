@@ -38,12 +38,12 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
-#include "cgi.hpp"
+#include "Cgi.hpp"
 
 // #define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
 
-// #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default_works.conf"
-#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
+#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default_works.conf"
+// #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
 // std::vector<Server>	servers;
 
@@ -61,7 +61,7 @@ void	ft_parse_request(std::map<int, Client> & clients, int fd);
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 
 void    ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers);
-void    ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server);
+void    ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server, int fd);
 
 void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
 						std::vector<struct kevent> & evlist, Server & server);
@@ -70,10 +70,10 @@ void	ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 					std::vector<struct kevent> & evlist, Server & server);
 
 // void	ft_response_to_get(Client & client);
-void	ft_response_to_get(Client & client, Server & server, Location & location);
+void	ft_response_to_get(Client & client, Server & server, Location & location, int fd);
 
 // void	ft_response_to_post(Client & client);
-void	ft_response_to_post(Client & client, Server & server, Location & location);
+void	ft_response_to_post(Client & client, Server & server, Location & location, int fd);
 
 void	ft_response_to_delete(Client & client);
 void	ft_create_my_def_response(Client & client);
@@ -88,6 +88,10 @@ void	ft_parse(std::vector<Server> & servers, const char *conf_file);
 bool	ft_check_end_request(std::string & buf);
 
 void	ft_send_not_implemented(Client & client);
+
+std::string ft_get_req_path_extension(Client & client);
+void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
+
 
 #endif
 

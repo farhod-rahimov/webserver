@@ -1,173 +1,125 @@
-#include "headers/cgi.hpp"
+#include "./headers/Cgi.hpp"
 
-CGI::CGI() {
-	_init = false;
-}
+#include <string.h>
 
-void CGI::init(Server *server, Client *client, const char *path) {
-	_server = server;
-	_client = client;
-	_path = strdup(path);
-	_bodySize = 0;
-	_init = true;
-	setEnvironment();
-	executeCGI();
-}
+Cgi::Cgi(Client & client, Server & server, Location & location, int fd) {
+    this->_resp_client = client;
+    this->_resp_server = server;
+    this->_resp_location = location;
+    this->_fd = fd;
+};
 
-CGI::~CGI() {}
+Cgi::~Cgi() {
+    this->cgiClearEnv();
+};
 
-bool CGI::isInit() {return _init;}
+Cgi::Cgi(const Cgi & src) {
+    *this = src;
+};
 
-void CGI::setEnvironment() {
-	std::map<std::string, std::string> env;
-
-	queryStringParse(_client, _client->ReqGetPath());
-
-	_clientHeader = _client->getBuff().substr(0, _client->getBuff().find(BODY_SEP));
-
-	env["AUTH_TYPE"] = "basic";
-	env["CONTENT_LENGTH"] = std::to_string(_client->ReqGetContentLength()); // nado proverit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	env["CONTENT_TYPE"] = _client->ReqGetContentType();
-	env["GATEWAY_INTERFACE"] = "CGI/1.1";
-	env["PATH_INFO"] = _client->ReqGetPath();
-	env["PATH_TRANSLATED"] = _client->ReqGetPath();
-	env["QUERY_STRING"] = _queryString;
-	env["REMOTE_ADDR"] = _server->getHost();
-	env["REMOTE_IDENT"] = "basic";
-	env["REMOTE_USER"] = "basic";
-	env["REQUEST_METHOD"] = _client->ReqGetMethod();
-	env["REQUEST_URI"] = _client->ReqGetPath();
-	env["SCRIPT_NAME"] = _client->ReqGetPath();
-
-    if (_server->getServerName().empty())
-		env["SERVER_NAME"] = env["REMOTE_ADDR"];
-	else
-		env["SERVER_NAME"] = _server->getServerName();
-
-	env["SERVER_PORT"] = _server->getPort();
-	env["SERVER_PROTOCOL"] = "HTTP/1.1";
-	env["SERVER_SOFTWARE"] = "KiRoTaMagic/6.9";
-	env["HTTP_X_SECRET_HEADER_FOR_TEST"] = "1";
-
-    // env.insert(_clientHeader.begin(), _clientHeader.end());
-	// env.insert(_client->getBuff().substr(_client->getBuff().find(BODY_SEP)));
-
-	setEnvToString(env);
-	env.clear();
-}
-
-void CGI::queryStringParse(Client *client, std::string path)
-{
-	if (client->getBuff().find(CRLF) != std::string::npos)
-	{
-		size_t queryStringPos = 0;
-		if ((queryStringPos = path.find('?')) != std::string::npos)
-		{
-			_queryString = std::string(path, queryStringPos + 1);
-		}
-	}
-}
-
-char **CGI::setEnvToString(std::map<std::string, std::string> env) {
-	_environment = (char **)calloc(env.size() + 1, sizeof(char *));
-
-	std::map<std::string, std::string>::iterator it;
-	int i = 0;
-	for (it = env.begin(); it != env.end(); it++, i++) {
-		std::string str = it->first + "=" + it->second;
-		_environment[i] = strdup(str.c_str());
-	}
-	return _environment;
-}
-
-void CGI::clean() {
-	if (_init) {
-		for (size_t i = 0; _environment[i]; i++) {
-			if (_environment[i]) {
-				free(_environment[i]);
-				_environment[i] = nullptr;
-			}
-		}
-		free(_environment);
-		_environment = nullptr;
-		free(_path);
-		_path = nullptr;
-	}
-}
-
-char **CGI::getEnvironment() const { return _environment; }
-
-void	CGI::executeCGI() {
-
-	int savedFd[2];
-	FILE *file[2];
-	int fd[2];
-	pid_t pid;
-	std::string newBody;
-
-	if ((savedFd[IN] = dup(STDIN_FILENO)) == -1 || (savedFd[OUT] = dup(STDOUT_FILENO)) == -1)
-		throw std::runtime_error(RED + std::string("Can't create file descriptor") + RESET);
-	if (!(file[IN] = tmpfile()) || !(file[OUT] = tmpfile()))
-		throw std::runtime_error(RED + std::string("Can't create temporary file") + RESET);
-	if ((fd[IN] = fileno(file[IN])) == -1 || (fd[OUT] = fileno(file[OUT])) == -1)
-		throw std::runtime_error(RED + std::string("Can't create file descriptor") + RESET);
-
-	write(fd[IN], _client->ReqGetContent().c_str(), _client->ReqGetContent().size());
-	lseek(fd[IN], SEEK_SET, SEEK_SET);
-
-	pid = fork();
-	if (pid == -1) {
-		_client->RespSetStatusCode("500");
-		throw std::runtime_error(RED + std::string("Can't fork process") + RESET);
-	}
-	else if (pid == 0) {
-		dup2(fd[IN], STDIN_FILENO);
-		dup2(fd[OUT], STDOUT_FILENO);
-		char * const * nlPointer = NULL;
-		if (execve(_path, nlPointer, _environment) == -1)
-			throw std::runtime_error(RED + std::string("Execve crashed!") + RESET);
-		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
-	}
-	else
-	{
-		char buffer[CGI_BUFSIZE];
-		waitpid(-1, NULL, 0);
-		lseek(fd[OUT], SEEK_SET, SEEK_SET);
-		ssize_t bytes = 1;
-		while (bytes > 0) {
-			bzero(buffer, CGI_BUFSIZE);
-			bytes = read(fd[OUT], buffer, CGI_BUFSIZE);
-			_bodySize += bytes;
-			newBody += buffer;
-		}
-	}
-	dup2(savedFd[IN], STDIN_FILENO);
-	dup2(savedFd[OUT], STDOUT_FILENO);
-	fclose(file[IN]);
-	fclose(file[OUT]);
-	close(fd[IN]);
-	close(fd[OUT]);
-	close(savedFd[IN]);
-	close(savedFd[OUT]);
-	if (pid == 0)
-		exit(0);
-	size_t pos;
-	std::string _clientHeader;
-	if ((pos = newBody.find(BODY_SEP, 0)) != std::string::npos) {
-		_clientHeader = std::string(newBody, 0, pos + 4);
-		newBody = std::string(newBody, pos + 4);
-		if (_clientHeader.find("Status: ", 0) != std::string::npos)
-			_client->RespSetStatusCode(_clientHeader.substr(8, 3).c_str());
-		if ((pos = _clientHeader.find("Content-Type: ", 0)) != std::string::npos)
-			_client->ReqSetContentType(_clientHeader.substr(pos + 14, 24));
-
-		_client->setCgiHeader(_clientHeader);
-
-		_client->RespSetContentLength((size_t)_bodySize - _clientHeader.size());
-	}
-	char *temp = new char(newBody.size());
-    for (size_t i = 0; i < newBody.size(); ++i) {
-        temp[i] = newBody[i];
+Cgi & Cgi::operator = (const Cgi & src) {
+    if (this != &src) {
+        this->_resp_client = src._resp_client;
+        this->_resp_server = src._resp_server;
+        this->_resp_location = src._resp_location;
+        this->_env = src._env;
+        this->_fd = src._fd;
+        this->_tmp_env = src._tmp_env;
     }
-	_client->setCgiBody(temp);
-}
+    return (*this);
+};
+
+void Cgi::cgiInit(void) {
+    this->cgiCreateEnv();
+    this->cgiConvertEnv();
+    this->cgiExecute();
+};
+
+void Cgi::cgiCreateEnv(void) {
+    std::map<std::string, std::string> & tmp_env = this->_tmp_env;
+
+
+    tmp_env["SERVER_SOFTWARE="] = "beast_server 1.0";
+    tmp_env["SERVER_NAME="] = this->_resp_server.getHost();
+    tmp_env["GATEWAY_INTERFACE="] = "beast_cgi 1.0";
+    tmp_env["SERVER_PROTOCOL="] = this->_resp_client.ReqGetProtocol();
+    tmp_env["SERVER_PORT="] = this->_resp_server.getPort();
+    tmp_env["REQUEST_METHOD="] = this->_resp_client.ReqGetMethod();
+    
+    std::string path_info;
+    std::string path = _resp_client.ReqGetPath();
+    size_t pos = path.find(this->_resp_location.getCgiExtension());
+    
+    if (path.back() != '/') {path.append("/");}
+    if (pos != std::string::npos) {pos += this->_resp_location.getCgiExtension().length();}
+    if (path.length() > pos + 1) {path_info = path.substr(pos + 1);}
+    
+    tmp_env["PATH_INFO="] = path_info;
+    
+    if (!path_info.empty())
+    tmp_env["PATH_TRANSLATED="] = path;
+    
+    tmp_env["SCRIPT_NAME="] = this->_resp_location.getCgiPath();
+    
+    pos = this->_resp_client.ReqGetPath().find("?");
+    if (pos != std::string::npos)
+        tmp_env["QUERY_STRING="] = this->_resp_client.ReqGetPath().substr(pos + 1);
+    else {
+        tmp_env["QUERY_STRING="] = this->_resp_client.ReqGetContent();
+        tmp_env["CONTENT_TYPE="] = this->_resp_client.ReqGetContentType();
+        tmp_env["CONTENT_LENGTH="] = this->_resp_client.ReqGetContentLength();
+    }
+};
+
+void Cgi::cgiConvertEnv(void) {
+    std::string tmp;
+    this->_env = new char * [this->_tmp_env.size() + 1];
+
+    int i = 0;
+    for (std::map<std::string, std::string>::iterator it = this->_tmp_env.begin(); \
+            it != this->_tmp_env.end(); it++) {
+        tmp = it->first + it->second;
+        this->_env[i++] = strdup(tmp.c_str());
+    }
+    this->_env[i] = NULL;
+};
+
+void Cgi::cgiExecute(void) {
+    pid_t   child;
+    int     status;
+    int     initial_fd;
+
+    if ((initial_fd = dup(this->_fd)) == -1) {
+        std::cerr << "Dup error\n" ; return ;
+    }
+    if (dup2(this->_fd, 1) == -1) {
+        std::cerr << "Dup2 error\n" ; return ;
+    }
+
+    // ------------------------------------------------------------------------ //
+
+    if ((child = fork()) == 0) {
+        if ((execve(this->_resp_location.getCgiPath().c_str(), NULL, this->_env)) == -1) {
+            std::cerr << "Execve error\n"; exit(1);
+        }
+    }
+    else if (child == -1) {
+        std::cerr << "Fork error\n" ; return ;
+    }
+    else {
+        waitpid(child, &status, 0);
+    }
+
+    // ------------------------------------------------------------------------ //
+
+    if (dup2(this->_fd, initial_fd) == -1) {
+        std::cerr << "Dup2 error\n" ; return ;
+    }
+};
+
+void Cgi::cgiClearEnv(void) {
+    for (size_t i = 0; this->_env[i] != NULL; i++) {
+        delete this->_env[i];
+    }
+    delete [] this->_env;
+};

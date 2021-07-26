@@ -101,6 +101,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
     (void)chlist;
     int fd = evlist[i].ident;
 	if (evlist[i].filter & EVFILT_READ) {
+			bzero(buf, BUFFER_SIZE + 1);
 			ret = recv(fd, &buf, BUFFER_SIZE, 0);
 			if (ret < 0) {
 				std::cout << "recv ERROR";
@@ -111,7 +112,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			for (int i = 0; i < ret; i++) {
 				clients[fd].getBuff().push_back(buf[i]);
 			}
-			// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+			std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
     }
 	if (ft_check_end_request(clients[fd].getBuff()) == true){
 
