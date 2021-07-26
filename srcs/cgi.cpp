@@ -87,9 +87,9 @@ void Cgi::cgiConvertEnv(void) {
 void Cgi::cgiExecute(void) {
     pid_t   child;
     int     status;
-    int     initial_fd;
+    int     initial_1;
 
-    if ((initial_fd = dup(this->_fd)) == -1) {
+    if ((initial_1 = dup(1)) == -1) {
         std::cerr << "Dup error\n" ; return ;
     }
     if (dup2(this->_fd, 1) == -1) {
@@ -109,12 +109,12 @@ void Cgi::cgiExecute(void) {
     else {
         waitpid(child, &status, 0);
     }
+    if (dup2(initial_1, 1) == -1) {
+        std::cerr << "Dup2 error\n" ; return ;
+    }
 
     // ------------------------------------------------------------------------ //
 
-    if (dup2(this->_fd, initial_fd) == -1) {
-        std::cerr << "Dup2 error\n" ; return ;
-    }
 };
 
 void Cgi::cgiClearEnv(void) {

@@ -9,7 +9,6 @@ void	ft_response_to_post(Client & client, Server & server, Location & location, 
 
     req_path_extension = ft_get_req_path_extension(client);
     if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
-
         ft_work_with_cgi(client, server, location, fd);
         return ;
     }
