@@ -158,3 +158,21 @@ void ft_send_not_found(Client & client) {
 	
 	client.RespCreateFullRespTxt();	
 }
+
+void ft_send_too_long_body(Client & client, int fd, int kq) {
+	const char * content = "<html>\nError 413 Request Entity Too Large. \nThe request cannot be carried out by the web server\n</html>";
+	
+	client.RespSetStatusCode("413");
+	client.RespSetStatusTxt("Request Entity Too Large");
+	client.RespSetContentType("text/html");
+	client.RespSetContentLength(strlen(content));
+	client.RespSetContent(content);
+	
+	client.RespCreateFullRespTxt();
+
+    send(fd, client.RespGetFullRespTxt().c_str(), client.RespGetRemainedToSent(), 0);
+
+    struct kevent tmp;
+    EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+    kevent(kq, &tmp, 1, NULL, 0, NULL);
+}

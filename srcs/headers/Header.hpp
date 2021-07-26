@@ -99,6 +99,9 @@ void ft_work_with_cgi(Client & client, Server & server, Location & location, int
 
 void ft_send_created(Client & client);
 
+void ft_send_too_long_body(Client & client, int fd, int k);
+
+
 #endif
 
 

@@ -115,7 +115,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 				clients[fd].getBuff().push_back(buf[i]);
 			}
 
-		std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+		// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
 		if (ft_check_end_request(clients[fd].getBuff()) == true) {
 			for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
 			struct kevent tmp;
@@ -124,8 +124,13 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			// EV_SET(&chlist[i], fd, EVFILT_READ, EV_CLEAR, 0, 0, 0);
 			// EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
 	        ft_parse_request(clients, fd);
-        	clients[fd].getBuff().clear();
-			ft_create_response(clients[fd], servers, server, fd);
+			if (clients[fd].ReqGetContentLength() > static_cast<size_t>(std::atoi(server.getLimitBodySize().c_str()))) {
+				ft_send_too_long_body(clients[fd], fd, kq);
+			}
+			else {
+				ft_create_response(clients[fd], servers, server, fd);
+			}
+        		clients[fd].getBuff().clear();
 		}
     }
 	std::cout << "																			ALKSMCLKASMCLKSAMCSKALCMSALKCMLAKSMCAS\n";

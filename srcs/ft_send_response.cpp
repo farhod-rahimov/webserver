@@ -26,6 +26,8 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 	std::map<int, Client> & clients = server.getClients();
 	// ft_create_response(clients[fd], servers, server, fd);
     
+	
+
 	int already_sent = clients[fd].RespGetFullRespTxt().length() - clients[fd].RespGetRemainedToSent();
 
 	if (clients[fd].RespGetRemainedToSent() > 0)
