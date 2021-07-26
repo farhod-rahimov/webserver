@@ -1,28 +1,17 @@
 #include "./headers/Header.hpp"
 
 int ft_execve_rm(const char *filename);
+void ft_send_ok(Client & client);
 
-void ft_response_to_delete(Client & client) {
-    std::string content;
-    std::string extension;
-
-    if (client.ReqGetPath().length() == 1) {
-        client.ReqGetPath().replace(client.ReqGetPath().find("/"), 1, "./hosted_website/indexCopy.html");  // нужно перебирать все .html файлы, к-рые указаны в конфиг файле
+void	ft_response_to_delete(Client & client, Server & server, Location & location, int fd) {
+    (void)server;
+    (void)location;
+    (void)fd;
+    if (ft_execve_rm(client.ReqGetPath().c_str()) < 0) {
+        ft_send_not_found(client);
     }
-    else
-        client.ReqGetPath().replace(client.ReqGetPath().find("/"), 1, "./hosted_website/");
-
-
-    if (!ft_read_file(client.ReqGetPath().c_str(), content)) {
-        content = "<html>\nFILE HAS NOT BEEN DELETED, IT DOESNT EXIST!\n</html>";
-    }
-    else {
-        if (!ft_execve_rm(client.ReqGetPath().c_str()))
-            content = "<html>\nFILE HAS BEEN DELETED!\n</html>";
-        else
-            content = "<html>\nFILE HAS NOT BEEN DELETED, IT DOESNT EXIST!\n</html>";
-    }
-    ft_create_header("text/html", client, content);
+    else 
+        ft_send_ok(client);
 }
 
 int ft_execve_rm(const char *filename) {
@@ -56,4 +45,11 @@ int ft_execve_rm(const char *filename) {
     delete [] argv;
     std::cout << WEXITSTATUS(status) << "SEE IT\n";
     return (WEXITSTATUS(status));
+}
+
+void ft_send_ok(Client & client) {
+	client.RespSetStatusCode("200");
+	client.RespSetStatusTxt("OK");
+	
+	client.RespCreateFullRespTxt();	
 }

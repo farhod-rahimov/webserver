@@ -2,6 +2,7 @@
 
 std::vector<Server>	servers;
 
+
 int kq;
 
 int ft_socket_init(Server & server, int opt) {
@@ -114,7 +115,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 				clients[fd].getBuff().push_back(buf[i]);
 			}
 
-		// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+		std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
 		if (ft_check_end_request(clients[fd].getBuff()) == true) {
 			for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
 			struct kevent tmp;

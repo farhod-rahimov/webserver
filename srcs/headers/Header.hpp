@@ -78,7 +78,9 @@ void	ft_response_to_get(Client & client, Server & server, Location & location, i
 // void	ft_response_to_post(Client & client);
 void	ft_response_to_post(Client & client, Server & server, Location & location, int fd);
 
-void	ft_response_to_delete(Client & client);
+// void	ft_response_to_delete(Client & client);
+void	ft_response_to_delete(Client & client, Server & server, Location & location, int fd);
+
 void	ft_create_my_def_response(Client & client);
 
 int		ft_read_file(const char * filename,  std::string & content);
@@ -95,7 +97,7 @@ void	ft_send_not_implemented(Client & client);
 std::string ft_get_req_path_extension(Client & client);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
 
-void ft_send_ok(Client & client);
+void ft_send_created(Client & client);
 
 #endif
 
@@ -117,3 +119,7 @@ void ft_send_ok(Client & client);
 // URL=https://www.youtube.com/watch?v=a14XiTXjOow&list=PLVQYiy6xNUxxd5TiZL87_v6JOx61umsUz
 
 // ------WebKitFormBoundary733G5uZa0AHSReD8--
+
+// curl -X DELETE -H "DELETE /cgi_bin/helloWorld.py HTTP/1.1	
+	
+// 	" https:/0.0.0.0:50001 
