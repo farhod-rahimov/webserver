@@ -1,5 +1,4 @@
 #include "./headers/Header.hpp"
-#define BUFFER_SIZE 100000 // get - макс 2048 байт
 
 std::vector<Server>	servers;
 
@@ -112,7 +111,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			for (int i = 0; i < ret; i++) {
 				clients[fd].getBuff().push_back(buf[i]);
 			}
-			std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+			// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
     }
 	if (ft_check_end_request(clients[fd].getBuff()) == true){
 

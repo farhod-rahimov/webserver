@@ -1,6 +1,8 @@
 #ifndef HEADER_HPP
 # define HEADER_HPP
 
+#define BUFFER_SIZE 100000 // get - макс 2048 байт
+
 #include <sys/socket.h>  // socket
 #include <sys/types.h>   // connect
 #include <iostream>
@@ -34,6 +36,7 @@
 # include <fstream>
 # include <string.h>
 #include <fstream>
+#include <sstream>
 
 #include "Client.hpp"
 #include "Server.hpp"

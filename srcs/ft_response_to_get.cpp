@@ -80,6 +80,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
     }
     // std::cout << content << "\n"; exit(1);
     ft_create_header(content_type.c_str(), client, content);
+    // std::cout << content.length() << " " << content.size() << " SJANCXKJASNCKJASNCKASJCNAJKSCNJKS\n"; exit(1);
     if (status_code.length())
         client.RespGetStatusCode() = status_code;
 }
@@ -94,7 +95,7 @@ void ft_get_content_type(std::string & content_type, std::string & extension) {
     
     const char * text_extensions [] = { "html", "css", "csv", "txt", "rtx", "yaml", "bmp", NULL};
     
-    const char * video_extensions [] = { "3gp", "mp4", "mpeg", "avi", "movie", NULL};
+    // const char * video_extensions [] = { "3gp", "mp4", "mpeg", "avi", "movie", NULL};
 
     size_t i;
 
@@ -118,14 +119,14 @@ void ft_get_content_type(std::string & content_type, std::string & extension) {
                     extension.compare(text_extensions[i]) != 0; i++) {}
 
                 if (text_extensions[i] == NULL) {
-                    content_type = "video/";
-                    for (i = 0; video_extensions[i] != NULL && \
-                        extension.compare(video_extensions[i]) != 0; i++) {}
+                    // content_type = "video/";
+                    // for (i = 0; video_extensions[i] != NULL && \
+                    //     extension.compare(video_extensions[i]) != 0; i++) {}
                     
-                    if (video_extensions[i] == NULL) {
+                    // if (video_extensions[i] == NULL) {
                         content_type = "application/octet-stream";
                         return ;
-                    }
+                    // }
                 }
             }
         }
