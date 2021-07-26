@@ -21,6 +21,7 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 	ft_create_response(clients[fd], servers, server, fd);
     
 	ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
+	std::cout << "																SENT BYTES " << ret << std::endl;
 	// if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
 	// std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
 	

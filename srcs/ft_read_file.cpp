@@ -28,6 +28,7 @@ int ft_read_file(const char * filename,  std::string & content) {
         if (!ifs.eof())
             content.push_back(c);
     }
+    std::cout << "                                                              LEN = " << content.length() << std::endl;
     ifs.close();
     ofs.close();
     return (1);
