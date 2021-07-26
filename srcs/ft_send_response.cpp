@@ -14,23 +14,41 @@ void ft_send_not_implemented(Client & client) {
 	client.RespCreateFullRespTxt();	
 }
 
+void send_or_not() {
+
+}
+
 void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers) {
-	int ret;
+	int ret = 0;
+	size_t i = 0;
 	(void)ret;
+	(void)servers;
 	std::map<int, Client> & clients = server.getClients();
-	ft_create_response(clients[fd], servers, server, fd);
+	// ft_create_response(clients[fd], servers, server, fd);
     
-	ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0);
+	int already_sent = clients[fd].RespGetFullRespTxt().length() - clients[fd].RespGetRemainedToSent();
+
+	if (clients[fd].RespGetRemainedToSent() > 0)
+		ret = send(fd, clients[fd].RespGetFullRespTxt().c_str() + already_sent, clients[fd].RespGetRemainedToSent(), 0);
+	
+	clients[fd].RespSetRemainedToSent(clients[fd].RespGetRemainedToSent() - ret);
 	std::cout << "																SENT BYTES " << ret << std::endl;
+	std::cout << "																REMAINED TO SENT " << clients[fd].RespGetRemainedToSent() << std::endl;
+	
+	if (clients[fd].RespGetRemainedToSent() <= 0) {
+		for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
+		EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_CLEAR, 0, 0, 0);
+		EV_SET(&chlist[i], fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+		if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
+			size_t i = 0;
+			for (; i < chlist.size() && chlist[i].ident != fd; i++) {}
+			close(fd);
+			chlist.erase(chlist.begin() + i);
+		}
+	}
 	// if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
 	// std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
 	
-	if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
-		size_t i = 0;
-		for (; i < chlist.size() && chlist[i].ident != fd; i++) {}
-		close(fd);
-		chlist.erase(chlist.begin() + i);
-	}
 }
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
 void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path);

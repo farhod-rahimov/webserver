@@ -99,7 +99,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 	std::map<int, Client> & clients = server.getClients();
     (void)chlist;
     int fd = evlist[i].ident;
-	if (evlist[i].filter & EVFILT_READ) {
+	if (evlist[i].filter == EVFILT_READ) {
 			bzero(buf, BUFFER_SIZE + 1);
 			ret = recv(fd, &buf, BUFFER_SIZE, 0);
 			if (ret < 0) {
@@ -111,16 +111,26 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			for (int i = 0; i < ret; i++) {
 				clients[fd].getBuff().push_back(buf[i]);
 			}
-			// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+
+		// std::cout << ret << " CAME REQUEST\n'" << clients[fd].getBuff() << "'\n";
+		if (ft_check_end_request(clients[fd].getBuff()) == true) {
+			for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
+			EV_SET(&chlist[i], fd, EVFILT_READ, EV_CLEAR, 0, 0, 0);
+			EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
+	        ft_parse_request(clients, fd);
+        	clients[fd].getBuff().clear();
+			ft_create_response(clients[fd], servers, server, fd);
+		}
+			
     }
-	if (ft_check_end_request(clients[fd].getBuff()) == true){
+	if (evlist[i].filter == EVFILT_WRITE && clients[fd].RespGetRemainedToSent() > 0) {
 
     // if (ret < BUFFER_SIZE) {
     // if (clients[fd].getBuff().size() && clients[fd].getBuff().find("\r\n\r\n") != clients[fd].getBuff().npos) {
                     /* наличие сообщения в запросе не учтено, если оно есть то нужно сюда заходить после получения */
-        ft_parse_request(clients, fd);
+        // ft_parse_request(clients, fd);
         ft_send_response(server, fd, chlist, servers);
-        clients[fd].getBuff().clear();
+        // clients[fd].getBuff().clear();
     }
 }
 
