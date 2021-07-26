@@ -13,6 +13,7 @@ int ft_read_file(const char * filename,  std::string & content) {
     if (ret == -1 && errno == EISDIR) {
         return (0);
     }
+    close(ret);
 
     ifs.open(filename); // should be the full paath of the file
     if (!ifs.is_open()) {
@@ -20,13 +21,12 @@ int ft_read_file(const char * filename,  std::string & content) {
     }
     ofs.open(tmp);
 
+    std::ifstream::char_type c;
+
     while (!ifs.eof()) {
-        std::getline(ifs, tmp);
-        tmp.append("\n");
-        content += tmp;
-        if (ifs.eof())
-            break ;
-        // std::cout << tmp;
+        ifs.get(c);
+        if (!ifs.eof())
+            content.push_back(c);
     }
     ifs.close();
     ofs.close();
