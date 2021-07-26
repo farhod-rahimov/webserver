@@ -95,6 +95,7 @@ void	ft_send_not_implemented(Client & client);
 std::string ft_get_req_path_extension(Client & client);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
 
+void ft_send_ok(Client & client);
 
 #endif
 

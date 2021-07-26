@@ -17,6 +17,7 @@ void ft_response_to_get(Client & client, Server & server, Location & location, i
     std::cout << req_path_extension;
     if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
         ft_work_with_cgi(client, server, location, fd);
+        ft_send_ok(client);
     	std::cout << "																				ALKLKAMDCKLMADSKLCMDALKCMAKLDMC\n";
         return ;
     }
