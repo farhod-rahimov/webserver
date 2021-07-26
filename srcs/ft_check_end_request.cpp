@@ -15,7 +15,8 @@ bool	ft_check_end_request(std::string & buf) {
         return (false);
 
     if (buf.find("Transfer-Encoding: chunked") != buf.npos)
-        return (ft_check_chunk_end(buf, first_dclrf));
+        return (false);
+        // return (ft_check_chunk_end(buf, first_dclrf));
     if (buf.find("Content-Length: ") != buf.npos)
         return (ft_check_body_end(buf, first_dclrf + 4));
     return (true);

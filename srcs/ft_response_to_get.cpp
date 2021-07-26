@@ -31,7 +31,7 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
 
     if (!ft_read_file(read_file.c_str(), content)) {
         read_file = server.getDefaultErrorPagePath();
-        if (errno == EISDIR) { // is directory
+        if (errno == EISDIR && client.ReqGetPath() == location.getLocationRoot()) { // is directory
             read_file = location.getDefaultFile();
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();
