@@ -4,18 +4,21 @@ bool ft_check_chunk_end(std::string & buf, size_t first_dclrf);
 bool ft_check_body_end(std::string & buf, size_t first_dclrf);
 size_t ft_count_body_length(std::string & buf, size_t first_dclrf);
 
+void ft_remove_extra_lines(std::string & buf, size_t first_dclrf);
 #define CLRF "\r\n"
 #define DOUBLE_CLRF "\r\n\r\n"
 
 bool	ft_check_end_request(std::string & buf) {
     size_t first_dclrf;
 
+
     first_dclrf = buf.find(DOUBLE_CLRF);
     if (first_dclrf == buf.npos)
         return (false);
 
-    if (buf.find("Transfer-Encoding: chunked") != buf.npos)
-        return (false);
+    if (buf.find("Transfer-Encoding: chunked") != buf.npos) {
+        return (ft_check_chunk_end(buf, first_dclrf));
+    }
         // return (ft_check_chunk_end(buf, first_dclrf));
     if (buf.find("Content-Length: ") != buf.npos)
         return (ft_check_body_end(buf, first_dclrf + 4));
@@ -28,8 +31,10 @@ bool ft_check_chunk_end(std::string & buf, size_t first_dclrf) {
     last_dclrf = buf.rfind(DOUBLE_CLRF);
     if (last_dclrf <= first_dclrf || last_dclrf == buf.npos)
         return (0);
-    if (buf[last_dclrf - 1] == '0' && buf[last_dclrf - 2] == '\n' && buf[last_dclrf - 3] == '\r')
+    if (buf[last_dclrf - 1] == '0' && buf[last_dclrf - 2] == '\n' && buf[last_dclrf - 3] == '\r') {
+        ft_remove_extra_lines(buf, first_dclrf);
         return (true);
+    }
     return (false);
 }
 
@@ -56,4 +61,22 @@ size_t ft_count_body_length(std::string & buf, size_t first_dclrf) {
     
     std::cout << "LEN " << len << std::endl;
     return (len);
+}
+
+void ft_remove_extra_lines(std::string & buf, size_t first_dclrf) {
+
+    size_t start = first_dclrf + 4;
+    std::string cleared_buf;
+
+    cleared_buf = buf.substr(0, start);
+    size_t tmp;
+    for (; start < buf.length(); start++) {
+        for (; start < buf.length() && buf[start] != '\r' && buf[start + 1] != '\n'; start++) {}
+        start += 2;
+        tmp = buf.find(CLRF, start);
+        if (start < buf.length() && tmp != std::string::npos)
+            cleared_buf += buf.substr(start, tmp + 2 - start);
+        start += tmp + 2 - start;
+    }
+    buf = cleared_buf;
 }
