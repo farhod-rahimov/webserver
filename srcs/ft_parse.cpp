@@ -7,6 +7,8 @@ Server ft_get_common_settings(std::string & content_file, size_t start, size_t e
 
 void ft_get_value(std::string & content_file, size_t pos, std::string * val, std::string & field);
 void ft_server_settings_error(std::string & str);
+void ft_server_too_many_fields(std::string & str);
+void ft_location_too_many_fields(std::string & str);
 size_t ft_skip_spaces_tabs(std::string & content_file, size_t i);
 size_t ft_skip_notspaces_nottabs_notnewlines(std::string & content_file, size_t i);
 
@@ -106,6 +108,7 @@ Server ft_get_common_settings(std::string & content_file, size_t start, size_t e
     for (int i = 0; i < 5; i++) {
         if ((pos = content_file.find(fields[i], start)) > end && fields[i].compare("server_name: ")) {ft_server_settings_error(fields[i]);}
         else {ft_get_value(content_file, pos + fields[i].length(), values[i], fields[i]);}
+        if (content_file.find(fields[i], pos + fields[i].length()) < end) {ft_server_too_many_fields(fields[i]);}
     }
     ft_get_first_val_before_space("'default error page's status code'", "'default error page path'", s.getDefaultErrorStatusCode(), s.getDefaultErrorPagePath());
 
@@ -137,10 +140,11 @@ Location ft_get_location_settings(std::string & content_file, size_t start, size
     size_t pos;
 
     for (int i = 0; i < 8; i++) {
-        pos = content_file.find(str_fields[i], start);
-        if (pos > end)
+        if ((pos = content_file.find(str_fields[i], start)) > end)
             continue ;
         ft_get_value(content_file, pos + str_fields[i].length(), str_values[i], str_fields[i]);
+        if (content_file.find(str_fields[i], pos + str_fields[i].length()) <= end && str_fields[i].compare("location: "))
+            ft_location_too_many_fields(str_fields[i]);
     }
 
     if (!l.getRedirection().length() && !l.getLocationRoot().length() && l.getAllowedMethods().find("POST") == l.getAllowedMethods().npos) {
@@ -194,6 +198,16 @@ void ft_server_settings_error(std::string & str) {
     std::cerr << "There is no '" << str << "' field in server's settings. Each server should at least have the following fields:\n";
     std::cerr << "host, port, default_error_page, limit_body_size, location\n\n";
     std::cerr << "In location there should be at least 1 field 'location_root: ' or 'redirection: '\n";
+    exit(EXIT_FAILURE);
+}
+
+void ft_server_too_many_fields(std::string & str) {
+    std::cerr << "There is more than 1 '" << str << "' field in server's settings\n";
+    exit(EXIT_FAILURE);
+}
+
+void ft_location_too_many_fields(std::string & str) {
+    std::cerr << "There is more than 1 '" << str << "' field in location's settings\n";
     exit(EXIT_FAILURE);
 }
 
