@@ -102,6 +102,9 @@ void ft_send_too_long_body(Client & client, int fd, int k);
 void ft_send_ok(Client & client);
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
 
+
+void ft_create_new_write_event(int kq, int fd);
+
 #endif
 
 

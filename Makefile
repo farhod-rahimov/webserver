@@ -9,6 +9,7 @@ SRCS =			./srcs/Client.cpp \
 				./srcs/ft_response_to_delete.cpp \
 				./srcs/ft_show_current_dir_files.cpp \
 				./srcs/ft_check_end_request.cpp \
+				./srcs/utils.cpp \
 				./srcs/Cgi.cpp \
 				./srcs/main.cpp
 
