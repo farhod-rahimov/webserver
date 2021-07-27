@@ -5,13 +5,13 @@ static void ft_get_path(std::string & _req_path, std::string & _req_method, std:
 static void ft_get_protocol(std::string & _req_protocol, std::string & _req_path, std::string & buf);
 static void ft_get_host(std::string & _req_host, std::string & buf);
 static void ft_get_connection(std::string & _req_connection, std::string & buf);
-
 static void ft_get_content_type(std::string & _req_content_type, std::string & buf);
 static void ft_get_content_length(Client & client, std::string & buf);
 static void ft_get_content(std::string & _req_content, std::string & buf);
 
-void ft_get_content_and_file_name(Client & client);
-std::string ft_get_file_name(std::string & str, size_t pos);
+static void ft_get_content_and_file_name(Client & client);
+static std::string ft_get_file_name(std::string & str, size_t pos);
+static void ft_get_new_content(std::string & _req_content, std::string & buf);
 
 void ft_parse_request(std::map<int, Client> & clients, int fd) {
     std::string buf = clients[fd].getBuff();
@@ -24,13 +24,13 @@ void ft_parse_request(std::map<int, Client> & clients, int fd) {
     ft_get_host(clients[fd].ReqGetHost(), buf);
     ft_get_connection(clients[fd].ReqGetConnection(), buf);
     
-    ft_get_content_type(clients[fd].ReqGetContentType(), buf); // needs to be tested
-    ft_get_content_length(clients[fd], buf); // needs to be tested
-    ft_get_content(clients[fd].ReqGetContent(), buf); // needs to be tested
+    ft_get_content_type(clients[fd].ReqGetContentType(), buf);
+    ft_get_content_length(clients[fd], buf);
+    ft_get_content(clients[fd].ReqGetContent(), buf);
     ft_get_content_and_file_name(clients[fd]);
 };
 
-void ft_get_method(std::string & _req_method, std::string & buf) {
+static void ft_get_method(std::string & _req_method, std::string & buf) {
     size_t i = buf.find("HTTP");
     size_t len;
 
@@ -41,10 +41,10 @@ void ft_get_method(std::string & _req_method, std::string & buf) {
         }
         _req_method = buf.substr(i, len - i);
     }
-    std::cout << "\nREQ_METHOD '" << _req_method << "'\n";
+    // std::cout << "\nREQ_METHOD '" << _req_method << "'\n";
 }
 
-void ft_get_path(std::string & _req_path, std::string & _req_method, std::string & buf) {
+static void ft_get_path(std::string & _req_path, std::string & _req_method, std::string & buf) {
     size_t i = buf.find(_req_method);
     size_t len;
 
@@ -58,10 +58,10 @@ void ft_get_path(std::string & _req_path, std::string & _req_method, std::string
             _req_path.replace(pos, 3, " ");
         }
     }
-    std::cout << "\nREQ_PATH '" << _req_path << "'\n";
+    // std::cout << "\nREQ_PATH '" << _req_path << "'\n";
 }
 
-void ft_get_protocol(std::string & _req_protocol, std::string & _req_path, std::string & buf) {
+static void ft_get_protocol(std::string & _req_protocol, std::string & _req_path, std::string & buf) {
     size_t i = buf.find(_req_path);
     size_t len;
 
@@ -72,10 +72,10 @@ void ft_get_protocol(std::string & _req_protocol, std::string & _req_path, std::
         }
         _req_protocol = buf.substr(i, len - i);
     }
-    std::cout << "\nREQ_PROTOCOL '" << _req_protocol << "'\n";
+    // std::cout << "\nREQ_PROTOCOL '" << _req_protocol << "'\n";
 }
 
-void ft_get_host(std::string & _req_host, std::string & buf) {
+static void ft_get_host(std::string & _req_host, std::string & buf) {
     size_t i = buf.find("Host:");
     size_t len;
 
@@ -86,10 +86,10 @@ void ft_get_host(std::string & _req_host, std::string & buf) {
         }
         _req_host = buf.substr(i, len - i);
     }
-    std::cout << "\nREQ_HOST '" << _req_host << "'\n";
+    // std::cout << "\nREQ_HOST '" << _req_host << "'\n";
 }
 
-void ft_get_connection(std::string & _req_connection, std::string & buf) {
+static void ft_get_connection(std::string & _req_connection, std::string & buf) {
     size_t i = buf.find("Connection:");
     size_t len;
 
@@ -100,10 +100,10 @@ void ft_get_connection(std::string & _req_connection, std::string & buf) {
         }
         _req_connection = buf.substr(i, len - i);
     }
-    std::cout << "\nREQ_Connection '" << _req_connection << "'\n";
+    // std::cout << "\nREQ_Connection '" << _req_connection << "'\n";
 }
 
-void ft_get_content_type(std::string & _req_content_type, std::string & buf) {
+static void ft_get_content_type(std::string & _req_content_type, std::string & buf) {
     size_t i = buf.find("Content-Type:");
     size_t len;
 
@@ -114,10 +114,10 @@ void ft_get_content_type(std::string & _req_content_type, std::string & buf) {
         }
         _req_content_type = buf.substr(i, len - i);
     }
-    std::cout << "\nREQ_Content-Type '" << _req_content_type << "'\n";
+    // std::cout << "\nREQ_Content-Type '" << _req_content_type << "'\n";
 };
 
-void ft_get_content_length(Client & client, std::string & buf) {
+static void ft_get_content_length(Client & client, std::string & buf) {
     size_t i = buf.find("Content-Length:");
     size_t len;
     
@@ -128,13 +128,12 @@ void ft_get_content_length(Client & client, std::string & buf) {
         }
         client.ReqSetContentLength(std::atoi(buf.substr(i, len - i).c_str()));
     }
-    std::cout << "\nREQ_Content-Length '" << client.ReqGetContentLength() << "'\n";
+    // std::cout << "\nREQ_Content-Length '" << client.ReqGetContentLength() << "'\n";
 };
 
-void ft_get_content(std::string & _req_content, std::string & buf) {
+static void ft_get_content(std::string & _req_content, std::string & buf) {
     size_t c_len = buf.find("Content-Length:");
     
-    // size_t i = buf.find("Content: ") + 4;
     size_t i = buf.find(DOUBLE_CLRF) + 4;
 
     if (c_len != buf.npos && i != buf.npos && i < buf.size()) {
@@ -143,9 +142,8 @@ void ft_get_content(std::string & _req_content, std::string & buf) {
     // std::cout << "\nREQ_Content '" << _req_content << "'\n";
 };
 
-void ft_get_new_content(std::string & _req_content, std::string & buf);
 
-void ft_get_content_and_file_name(Client & client) { // если это не отправка файла, но return
+static void ft_get_content_and_file_name(Client & client) { // если это не отправка файла, но return
     size_t file_name_pos = file_name_pos = client.ReqGetContent().find("filename=\"");
     
     if (client.ReqGetContent().empty() || (file_name_pos == client.ReqGetContent().npos))
@@ -158,7 +156,7 @@ void ft_get_content_and_file_name(Client & client) { // если это не о�
     ft_get_new_content(client.ReqGetContent(), tmp);
 }
 
-std::string ft_get_file_name(std::string & str, size_t pos) {
+static std::string ft_get_file_name(std::string & str, size_t pos) {
     std::string ret;
     size_t start_pos;
     
@@ -168,11 +166,11 @@ std::string ft_get_file_name(std::string & str, size_t pos) {
     for (; str[pos] != '"'; pos++) {}
 
     ret = str.substr(start_pos, pos - start_pos);
-    std::cout << "\nREQ_FILE_NAME '" << ret << "'\n";
+    // std::cout << "\nREQ_FILE_NAME '" << ret << "'\n";
     return (ret);
 }
 
-void ft_get_new_content(std::string & _req_content, std::string & buf) {
+static void ft_get_new_content(std::string & _req_content, std::string & buf) {
     size_t end = buf.rfind(CLRF);
 
     if (end != buf.npos) {
