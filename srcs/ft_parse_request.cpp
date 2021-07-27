@@ -135,7 +135,7 @@ void ft_get_content(std::string & _req_content, std::string & buf) {
     size_t c_len = buf.find("Content-Length:");
     
     // size_t i = buf.find("Content: ") + 4;
-    size_t i = buf.find("\r\n\r\n") + 4;
+    size_t i = buf.find(DOUBLE_CLRF) + 4;
 
     if (c_len != buf.npos && i != buf.npos && i < buf.size()) {
         _req_content = buf.substr(i);
@@ -154,7 +154,7 @@ void ft_get_content_and_file_name(Client & client) { // если это не о�
     client.ReqSetContentFileName(ft_get_file_name(client.ReqGetContent(), file_name_pos));
     ft_get_content_type(client.ReqGetContentType(), client.ReqGetContent());
 
-    std::string tmp = client.ReqGetContent().substr(client.ReqGetContent().find("\r\n\r\n") + 4);
+    std::string tmp = client.ReqGetContent().substr(client.ReqGetContent().find(DOUBLE_CLRF) + 4);
     ft_get_new_content(client.ReqGetContent(), tmp);
 }
 
@@ -173,7 +173,7 @@ std::string ft_get_file_name(std::string & str, size_t pos) {
 }
 
 void ft_get_new_content(std::string & _req_content, std::string & buf) {
-    size_t end = buf.rfind("\r\n");
+    size_t end = buf.rfind(CLRF);
 
     if (end != buf.npos) {
         for (; buf[end - 1] != '\n'; end--) {}

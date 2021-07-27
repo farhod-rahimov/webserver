@@ -2,6 +2,9 @@
 # define HEADER_HPP
 
 #define BUFFER_SIZE 100000 // get - макс 2048 байт
+#define CLRF "\r\n"
+#define DOUBLE_CLRF "\r\n\r\n"
+
 
 #include <sys/socket.h>  // socket
 #include <sys/types.h>   // connect

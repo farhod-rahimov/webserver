@@ -1,16 +1,12 @@
 #include "./headers/Header.hpp"
 
-bool ft_check_chunk_end(std::string & buf, size_t first_dclrf);
-bool ft_check_body_end(std::string & buf, size_t first_dclrf);
-size_t ft_count_body_length(std::string & buf, size_t first_dclrf);
-
-void ft_remove_extra_lines(std::string & buf, size_t first_dclrf);
-#define CLRF "\r\n"
-#define DOUBLE_CLRF "\r\n\r\n"
+static bool ft_check_chunk_end(std::string & buf, size_t first_dclrf);
+static bool ft_check_body_end(std::string & buf, size_t first_dclrf);
+static size_t ft_count_body_length(std::string & buf, size_t first_dclrf);
+static void ft_remove_extra_lines(std::string & buf, size_t first_dclrf);
 
 bool	ft_check_end_request(std::string & buf) {
     size_t first_dclrf;
-
 
     first_dclrf = buf.find(DOUBLE_CLRF);
     if (first_dclrf == buf.npos)
@@ -19,8 +15,7 @@ bool	ft_check_end_request(std::string & buf) {
     if (buf.find("Transfer-Encoding: chunked") != buf.npos) {
         return (ft_check_chunk_end(buf, first_dclrf));
     }
-        // return (ft_check_chunk_end(buf, first_dclrf));
-    if (buf.find("Content-Length: ") != buf.npos)
+    else if (buf.find("Content-Length: ") != buf.npos)
         return (ft_check_body_end(buf, first_dclrf + 4));
     return (true);
 }
@@ -38,9 +33,9 @@ bool ft_check_chunk_end(std::string & buf, size_t first_dclrf) {
     return (false);
 }
 
-bool ft_check_body_end(std::string & buf, size_t first_dclrf) {
-    size_t len;
-    size_t con_len;
+static bool ft_check_body_end(std::string & buf, size_t first_dclrf) {
+    size_t      len;
+    size_t      con_len;
     std::string txt_len;
 
     con_len = buf.find("Content-Length: ") + strlen("Content-Length: ");
@@ -50,24 +45,24 @@ bool ft_check_body_end(std::string & buf, size_t first_dclrf) {
     }
     txt_len = buf.substr(con_len - len, len);
     con_len = std::atoi(txt_len.c_str());
-    std::cout << "CON_LEN " << con_len << std::endl;
+    std::cout << "TOTAL     " << con_len << std::endl;
     if (con_len == ft_count_body_length(buf, first_dclrf))
         return (true);
     return (false);
 }
 
-size_t ft_count_body_length(std::string & buf, size_t first_dclrf) {
+static size_t ft_count_body_length(std::string & buf, size_t first_dclrf) {
     size_t len = buf.size() - first_dclrf;
     
-    std::cout << "LEN " << len << std::endl;
+    std::cout << "RECEIVED  " << len << std::endl;
     return (len);
 }
 
-void ft_remove_extra_lines(std::string & buf, size_t first_dclrf) {
-
-    size_t start = first_dclrf + 4;
+static void ft_remove_extra_lines(std::string & buf, size_t first_dclrf) {
+    size_t      start;
     std::string cleared_buf;
 
+    start = first_dclrf + 4;
     cleared_buf = buf.substr(0, start);
     size_t tmp;
     for (; start < buf.length(); start++) {
