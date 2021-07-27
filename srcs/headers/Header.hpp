@@ -100,6 +100,7 @@ void ft_work_with_cgi(Client & client, Server & server, Location & location, int
 void ft_send_too_long_body(Client & client, int fd, int k);
 
 void ft_send_ok(Client & client);
+void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
 
 #endif
 

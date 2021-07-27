@@ -68,8 +68,9 @@ void ft_set_connection_header(Client & client);
 void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server, int fd) {
 	int method;
 	Location responding_location;
+	(void)servers;
 	
-	ft_get_responding_server(servers, client, responding_server);
+	// ft_get_responding_server(servers, client, responding_server);
 	ft_get_responding_location(responding_server.getLocations(), responding_location, client.ReqGetPath());
 	if (responding_location.getRedirection().empty())
 		ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
@@ -93,20 +94,47 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server) {
 	
-	std::string req_server_name;
+	std::string req_server_host;
+	std::string req_server_port;
 
-	if (client.ReqGetHost().find(":") != client.ReqGetHost().npos)
-		req_server_name = client.ReqGetHost().substr(0, client.ReqGetHost().find(":"));
-	else
-		req_server_name = client.ReqGetHost();
-	// std::cout << "req_host " << req_server_name << "\n";
-	for (size_t i = 0; i < servers.size(); i++) {
-		if (servers[i].getHost() == responding_server.getHost() && servers[i].getPort() == responding_server.getPort()) {
-			if (servers[i].getServerName().find(req_server_name) != req_server_name.npos) {
+	if (client.ReqGetHost().find(":") != client.ReqGetHost().npos) {
+		req_server_host = client.ReqGetHost().substr(0, client.ReqGetHost().find(":"));
+		req_server_port = client.ReqGetHost().substr(client.ReqGetHost().find(":") + 1);
+
+		for (size_t i = 0; i < servers.size(); i++) {
+			if (req_server_host == servers[i].getHost() && req_server_port == servers[i].getPort()) {
 				responding_server = servers[i];
 			}
 		}
+		if (responding_server.getHost().length() == 0) {
+			for (size_t i = 0; i < servers.size(); i++) {
+				if (req_server_port == servers[i].getPort()) {
+					responding_server = servers[i];
+				}
+			}
+		}
+		if (responding_server.getHost().length() == 0) {
+			responding_server = servers[0];
+		}
 	}
+	else {
+		for (size_t i = 0; i < servers.size(); i++) {
+			for (size_t n = 0; n < servers[i].getClients().size(); n++) {
+				if (&servers[i].getClients()[n] == &client) {
+					responding_server = servers[i];
+					break ;
+				}
+			}
+		}
+	}
+	// // std::cout << "req_host " << req_server_name << "\n";
+	// for (size_t i = 0; i < servers.size(); i++) {
+	// 	if (servers[i].getHost() == responding_server.getHost() && servers[i].getPort() == responding_server.getPort()) {
+	// 		if (servers[i].getServerName().find(req_server_name) != req_server_name.npos) {
+	// 			responding_server = servers[i];
+	// 		}
+	// 	}
+	// }
 	// std::cout << responding_server.getServerName();
 }
 
