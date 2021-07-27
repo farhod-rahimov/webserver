@@ -99,7 +99,6 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 	char buf[BUFFER_SIZE + 1];
 	int ret = BUFFER_SIZE + 1;
 	
-	Server responding_server;
 	std::map<int, Client> & clients = server.getClients();
     (void)chlist;
     int fd = evlist[i].ident;
@@ -125,13 +124,11 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			// EV_SET(&chlist[i], fd, EVFILT_READ, EV_CLEAR, 0, 0, 0);
 			// EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
 	        ft_parse_request(clients, fd);
-			ft_get_responding_server(servers, clients[fd], responding_server);
-			std::cout << "acacasc " << responding_server.getServerName() << std::endl;
-			if (clients[fd].ReqGetContentLength() > static_cast<size_t>(std::atoi(responding_server.getLimitBodySize().c_str()))) {
+			if (clients[fd].ReqGetContentLength() > static_cast<size_t>(std::atoi(server.getLimitBodySize().c_str()))) {
 				ft_send_too_long_body(clients[fd], fd, kq);
 			}
 			else {
-				ft_create_response(clients[fd], servers, responding_server, fd);
+				ft_create_response(clients[fd], servers, server, fd);
 			}
 			clients[fd].getBuff().clear();
 		}
@@ -152,7 +149,8 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlist, \
 					std::vector<struct kevent> & evlist, Server & server) {
 	std::map<int, Client> & clients = server.getClients();
-	
+	std::map<int, Client>::iterator it = clients.begin();
+
 	for (int i = 0; i < nev; i++) {
 		if (evlist[i].flags & EV_ERROR) { /* Report errors */
 			std::cout << "EV_ERROR\n";
@@ -162,8 +160,27 @@ void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 		if (ft_check_new_connection(socket_fd, i, chlist, evlist, clients) == true) {
 			continue ;
 		}
-		ft_check_clients(i, chlist, evlist, server);
 	}
+
+	int i = 0;
+	for (; ; ) {
+		if (it != clients.end() && static_cast<size_t>(it->first) == evlist[i].ident) {
+			if (!(evlist[i].flags & EV_ERROR)) { /* Report errors */
+				ft_check_clients(i, chlist, evlist, server);
+			}
+			else {
+				std::cout << "EV_ERROR\n";
+			}
+		}
+		if (it == clients.end() && ++i < nev) {
+			it = clients.begin();
+		}
+		else if (it == clients.end())
+			break ;
+		else
+			it++;
+	}
+
 };
 
 
