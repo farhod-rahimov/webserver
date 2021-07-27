@@ -45,7 +45,7 @@
 
 // #define DEFAULT_CONF "/Users/keuclide/cursus/main_webserver/hosted_website/config/default.conf"
 
-#define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default_works.conf"
+#define DEFAULT_CONF "/Users/btammara/webserver/default_works.conf"
 // #define DEFAULT_CONF "/Users/btammara/webserver/hosted_website/config/default.conf"
 
 // std::vector<Server>	servers;
