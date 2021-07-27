@@ -108,27 +108,9 @@ void ft_get_responding_server(std::vector<Server> & servers, Client & client, Se
 
 void ft_create_new_write_event(int kq, int fd);
 
+/////trash.cpp
+void ft_print_result(std::vector<Server> & servers);
+
+// std:cout change to std::cerr
+
 #endif
-
-
-// ------WebKitFormBoundary733G5uZa0AHSReD8
-// Content-Disposition: form-data; name="file"; filename="PLAY_ME.url"
-// Content-Type: application/octet-stream
-
-// [InternetShortcut]
-// URL=https://www.youtube.com/watch?v=a14XiTXjOow&list=PLVQYiy6xNUxxd5TiZL87_v6JOx61umsUz
-
-// ------WebKitFormBoundary733G5uZa0AHSReD8--
-
-// ------WebKitFormBoundary733G5uZa0AHSReD8
-// Content-Disposition: form-data; name="file"; filename="PLAY_ME.url"
-// Content-Type: application/octet-stream
-
-// [InternetShortcut]
-// URL=https://www.youtube.com/watch?v=a14XiTXjOow&list=PLVQYiy6xNUxxd5TiZL87_v6JOx61umsUz
-
-// ------WebKitFormBoundary733G5uZa0AHSReD8--
-
-// curl -X DELETE -H "DELETE /cgi_bin/helloWorld.py HTTP/1.1	
-	
-// 	" https:/0.0.0.0:50001 
