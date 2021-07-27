@@ -11,7 +11,7 @@ void	ft_response_to_post(Client & client, Server & server, Location & location, 
     req_path_extension = ft_get_req_path_extension(client);
     if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
         ft_work_with_cgi(client, server, location, fd);
-        ft_send_created(client);
+        ft_send_ok(client);
         return ;
     }
     ft_save_file(client, location);
@@ -71,11 +71,3 @@ void ft_send_file_was_created(Client & client) {
 	
 	client.RespCreateFullRespTxt();	
 }
-
-void ft_send_created(Client & client) {
-	client.RespSetStatusCode("201");
-	client.RespSetStatusTxt("CREATED");
-	
-	client.RespCreateFullRespTxt();	
-}
-

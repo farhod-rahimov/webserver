@@ -1,7 +1,6 @@
 #include "./headers/Header.hpp"
 
 int ft_execve_rm(const char *filename);
-void ft_send_ok(Client & client);
 
 void	ft_response_to_delete(Client & client, Server & server, Location & location, int fd) {
     (void)server;

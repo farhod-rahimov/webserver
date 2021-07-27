@@ -130,7 +130,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 			else {
 				ft_create_response(clients[fd], servers, server, fd);
 			}
-        		clients[fd].getBuff().clear();
+			clients[fd].getBuff().clear();
 		}
     }
 	std::cout << "																			ALKSMCLKASMCLKSAMCSKALCMSALKCMLAKSMCAS\n";

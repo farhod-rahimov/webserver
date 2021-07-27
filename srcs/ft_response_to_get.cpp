@@ -17,7 +17,7 @@ void ft_response_to_get(Client & client, Server & server, Location & location, i
     std::cout << req_path_extension;
     if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
         ft_work_with_cgi(client, server, location, fd);
-        ft_send_created(client);
+        ft_send_ok(client);
     	std::cout << "																				ALKLKAMDCKLMADSKLCMDALKCMAKLDMC\n";
         return ;
     }
@@ -160,7 +160,7 @@ void ft_send_not_found(Client & client) {
 }
 
 void ft_send_too_long_body(Client & client, int fd, int kq) {
-	const char * content = "<html>\nError 413 Request Entity Too Large. \nThe request cannot be carried out by the web server\n</html>";
+	const char * content = "<html>\nError 413 Request Entity Too Large.\nThe request cannot be carried out by the web server\n</html>";
 	
 	client.RespSetStatusCode("413");
 	client.RespSetStatusTxt("Request Entity Too Large");

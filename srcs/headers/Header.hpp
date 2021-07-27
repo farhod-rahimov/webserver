@@ -97,10 +97,9 @@ void	ft_send_not_implemented(Client & client);
 std::string ft_get_req_path_extension(Client & client);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
 
-void ft_send_created(Client & client);
-
 void ft_send_too_long_body(Client & client, int fd, int k);
 
+void ft_send_ok(Client & client);
 
 #endif
 
