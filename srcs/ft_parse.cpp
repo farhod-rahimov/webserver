@@ -24,7 +24,6 @@ void ft_print_result(std::vector<Server> & servers) {
         std::cout << "host " << servers[i].getHost() << std::endl;
         std::cout << "port " << servers[i].getPort() << std::endl;
         std::cout << "server_name " << servers[i].getServerName() << std::endl;
-        std::cout << "server_root " << servers[i].getServerRoot() << std::endl;
         std::cout << "default_error_status_code " << servers[i].getDefaultErrorStatusCode() << std::endl;
         std::cout << "default_error_page_path " << servers[i].getDefaultErrorPagePath() << std::endl;
         std::cout << "limit_body_size " << servers[i].getLimitBodySize() << std::endl;

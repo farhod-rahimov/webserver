@@ -19,13 +19,12 @@ class Server {
         Server & operator = (const Server & src);
 
         bool                    & getCheckFlag(void);
-        std::string             & getHost(void); // mandatory
-        std::string             & getPort(void); // mandatory
+        std::string             & getHost(void);
+        std::string             & getPort(void);
         std::string             & getServerName(void);
-        std::string             & getServerRoot(void);              // лишний ?
-        std::string             & getDefaultErrorStatusCode(void); // mandatory
-        std::string             & getDefaultErrorPagePath(void); // mandatory
-        std::string             & getLimitBodySize(void); // mandatory  // in bytes
+        std::string             & getDefaultErrorStatusCode(void);
+        std::string             & getDefaultErrorPagePath(void);
+        std::string             & getLimitBodySize(void);
         
         std::vector<location>   & getLocations(void);
         std::map<int, Client>   & getClients(void);
@@ -35,7 +34,6 @@ class Server {
         std::string             _host;
         std::string             _port;
         std::string             _server_name;
-        std::string             _server_root;                       // лишний ?
         std::string             _default_error_status_code;
         std::string             _default_error_page_path;
         std::string             _limit_body_size;
@@ -53,14 +51,14 @@ struct Location {
 
         std::string & getAllowedMethods(void);
         std::string & getRedirection(void);
-        std::string & getRedirectionStatusCode(void); //
+        std::string & getRedirectionStatusCode(void);
         std::string & getPath(void);
         std::string & getAutoindex(void);
         std::string & getDefaultFile(void);
         std::string & getCgiPath(void);
-        std::string & getCgiExtension(void); //
+        std::string & getCgiExtension(void);
         std::string & getLocationRoot(void);
-        std::string & getUploadDirectory(void); // 10
+        std::string & getUploadDirectory(void);
 
         std::string _allowed_methods;
         std::string _redirection;

@@ -46,16 +46,6 @@ class Client {
 
 			// RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE | RESPONSE
 
-			// ------------ BODY/CGI_HEADER ------------
-
-			char *getCgiBody();
-			void setCgiBody(char *temp);
-
-			void setCgiHeader(std::string value);
-			std::string getCgiHeader();
-			
-			// -----------------------------------------
-
 			void RespSetProtocol(std::string);
 			std::string & RespGetProtocol(void);
 			
@@ -68,9 +58,6 @@ class Client {
 			void RespSetContentType(std::string);
 			std::string & RespGetContentType(void);
 			
-			// void RespSetContentLength(size_t);
-			// size_t RespGetContentLength(void);
-
 			void RespSetContentLength(size_t);
 			std::string & RespGetContentLength(void);
 			
@@ -104,60 +91,33 @@ class Client {
 
 			// REQUEST	|	REQUEST	|	REQUEST	|	REQUEST	|	REQUEST	|	REQUEST
 			
-			std::string _req_method;
+			std::string _req_method;//
 			
-			std::string _req_path;
-			std::string _req_protocol;
-			std::string _req_host;
-			std::string _req_connection;
+			std::string _req_path;//
+			std::string _req_protocol;//
+			std::string _req_host;//
+			std::string _req_connection;//
 			
-			
-			std::string _req_content_file_name;
-			std::string _req_content_type;
-			size_t		_req_content_length;
-			std::string _req_content;
+			std::string _req_content_file_name;//
+			std::string _req_content_type;//
+			size_t		_req_content_length;//
+			std::string _req_content;//
 
-			size_t		_req_num;
-			
 			// RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE	|	RESPONSE
 
-			// ----------- BODY/CGI_HEADER -----------
-
-			char *_cgiBody;
-			std::string _cgiHeader;
-
-			// ---------------------------------------
-
-			std::string _resp_protocol;
-			std::string _resp_status_code;
-			std::string _resp_status_txt;
+			std::string _resp_protocol;//
+			std::string _resp_status_code;//
+			std::string _resp_status_txt;//
 			
-			std::string _resp_connection;
-			std::string _resp_location;
+			std::string _resp_connection;//
+			std::string _resp_location;//
 			
-			std::string _resp_content_type;
-			// size_t		_resp_content_length;
-			std::string	_resp_content_length;
-			std::string _resp_content;
+			std::string _resp_content_type;//
+			std::string	_resp_content_length;//
+			std::string _resp_content;//
 
-			std::string _resp_full_resp_txt;
-			// int			_resp_full_resp_length;
-			int			_resp_remained_to_sent;
-			
-			size_t		_resp_num;
+			std::string _resp_full_resp_txt;//
+			int			_resp_remained_to_sent;//
 };
-
-// std::string & operator << (std::string & full_response, Response & response) {
-// 	full_response.clear();
-// 	full_response.append(response.getProtoVer()); full_response.append(" ");
-// 	full_response.append(response.getStatusCode()); full_response.append(" ");
-// 	full_response.append(response.getStatusText()); full_response.append("\n");
-// 	full_response.append(response.getConnection()); full_response.append("\n");
-// 	full_response.append(response.getContentType()); full_response.append("\n");
-// 	full_response.append(response.getContentLength()); full_response.append("\n\n");
-	
-// 	full_response.append(response.getContent()); full_response.append("\n");
-// 	return (full_response);
-// }
 
 #endif

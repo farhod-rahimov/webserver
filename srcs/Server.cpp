@@ -19,7 +19,6 @@ Server & Server::operator = (const Server & src) {          // complete it
         this->_host = src._host;
         this->_port = src._port;
         this->_server_name = src._server_name;
-        this->_server_root = src._server_root;
         this->_default_error_status_code = src._default_error_status_code;
         this->_default_error_page_path = src._default_error_page_path;
         this->_limit_body_size = src._limit_body_size;
@@ -40,10 +39,6 @@ std::string & Server::getPort(void) {
 
 std::string & Server::getServerName(void) {
     return (this->_server_name);
-};
-
-std::string & Server::getServerRoot(void) {
-    return (this->_server_root);
 };
 
 std::string & Server::getDefaultErrorStatusCode(void) {

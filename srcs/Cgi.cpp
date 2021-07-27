@@ -38,7 +38,6 @@ void Cgi::cgiInit(void) {
 void Cgi::cgiCreateEnv(void) {
     std::map<std::string, std::string> & tmp_env = this->_tmp_env;
 
-
     tmp_env["SERVER_SOFTWARE="] = "beast_server 1.0";
     tmp_env["SERVER_NAME="] = this->_resp_server.getHost();
     tmp_env["GATEWAY_INTERFACE="] = "beast_cgi 1.0";
