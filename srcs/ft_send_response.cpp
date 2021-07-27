@@ -70,7 +70,7 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	Location responding_location;
 	(void)servers;
 	
-	// ft_get_responding_server(servers, client, responding_server);
+	ft_get_responding_server(servers, client, responding_server);
 	ft_get_responding_location(responding_server.getLocations(), responding_location, client.ReqGetPath());
 	if (responding_location.getRedirection().empty())
 		ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
@@ -102,19 +102,16 @@ void ft_get_responding_server(std::vector<Server> & servers, Client & client, Se
 		req_server_port = client.ReqGetHost().substr(client.ReqGetHost().find(":") + 1);
 
 		for (size_t i = 0; i < servers.size(); i++) {
+			if (servers[i].getServerName().find(req_server_host) != std::string::npos && req_server_port == servers[i].getPort()) {
+				responding_server = servers[i];
+				return ;
+			}
+		}
+		for (size_t i = 0; i < servers.size(); i++) {
 			if (req_server_host == servers[i].getHost() && req_server_port == servers[i].getPort()) {
 				responding_server = servers[i];
+				return ;
 			}
-		}
-		if (responding_server.getHost().length() == 0) {
-			for (size_t i = 0; i < servers.size(); i++) {
-				if (req_server_port == servers[i].getPort()) {
-					responding_server = servers[i];
-				}
-			}
-		}
-		if (responding_server.getHost().length() == 0) {
-			responding_server = servers[0];
 		}
 	}
 	else {
