@@ -7,5 +7,4 @@ ft_send_response copy 2.cpp
 tester
 cgi_tester
 YoupiBanane
-client_uploaded_files
 a.out

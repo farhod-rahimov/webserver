@@ -22,6 +22,9 @@ FLAGS =			-Wall -Wextra -Werror -std=c++98
 
 NAME =			server
 
+UPLOADED_FILES = /Users/btammara/webserver/website_1/client_uploaded_files/* \
+				 /Users/btammara/webserver/website_2/client_uploaded_files/*
+
 %.o:			%.cpp
 				@ $(CC) -c $(FLAGS) $< -o $(<:.cpp=.o)
 
@@ -33,6 +36,7 @@ $(NAME):		$(OBJS)
 
 clean:
 				@ rm -f $(OBJS)
+				@ rm -f $(UPLOADED_FILES)
 
 fclean:			clean
 				@ rm -f $(NAME)
