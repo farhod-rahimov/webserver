@@ -21,6 +21,7 @@ void ft_response_to_get(Client & client, Server & server, Location & location, i
         client.RespSetStatusTxt("MOVED");
         if (location.getRedirection().back() == '/')
             location.getRedirection().pop_back();
+        client.RespCreateFullRespTxt();
         return ;
     }
     ft_get_content_and_content_type(client, server, location, content);
