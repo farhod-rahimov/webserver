@@ -97,9 +97,11 @@ bool	ft_check_end_request(std::string & buf);
 
 void	ft_send_not_implemented(Client & client);
 void ft_send_204_not_content(Client & client);
+void ft_send_file_was_created(Client & client);
 
 std::string ft_get_req_path_extension(Client & client);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
+std::string ft_get_req_path_extension(Client & client);
 
 void ft_send_too_long_body(Client & client, int fd, int k);
 void ft_send_internal_error(Client & client);
