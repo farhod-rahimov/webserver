@@ -23,7 +23,7 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 	}
 
 	clients[fd].RespSetRemainedToSent(clients[fd].RespGetRemainedToSent() - ret);
-	std::cout << "TOTAL BYTES TO SEND		" << ret << std::endl;
+	std::cout << "TOTAL BYTES TO SEND	" << ret << std::endl;
 	std::cout << "REMAINED BYTES TO SENT	" << clients[fd].RespGetRemainedToSent() << std::endl;
 	
 	if (clients[fd].RespGetRemainedToSent() <= 0) {
