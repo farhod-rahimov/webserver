@@ -6,12 +6,6 @@ void ft_create_new_write_event(int kq, int fd) {
     kevent(kq, &tmp, 1, NULL, 0, NULL);
 }
 
-void ft_send_ok(Client & client) {
-	client.RespSetStatusCode("200");
-	client.RespSetStatusTxt("OK");
-	client.RespCreateFullRespTxt();	
-}
-
 void ft_send_204_not_content(Client & client) {
 	client.RespSetStatusCode("204");
 	client.RespSetStatusTxt("NO CONTENT");
