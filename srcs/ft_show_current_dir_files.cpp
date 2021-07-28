@@ -29,8 +29,8 @@ int ft_show_current_dir_files(Client & client, Location & location, std::string 
         tmp = current_relative_dir_name + s->d_name;
         ft_push_file_name_to_content(content, tmp, s->d_name);
     }
-    
     ft_create_content_end(content);
+    closedir(current_dir);
     return (0);
 }
 
