@@ -29,10 +29,10 @@ Cgi & Cgi::operator = (const Cgi & src) {
     return (*this);
 };
 
-void Cgi::cgiInit(void) {
+int Cgi::cgiInit(void) {
     this->cgiCreateEnv();
     this->cgiConvertEnv();
-    this->cgiExecute();
+    return (this->cgiExecute());
 };
 
 void Cgi::cgiCreateEnv(void) {
@@ -83,37 +83,38 @@ void Cgi::cgiConvertEnv(void) {
     this->_env[i] = NULL;
 };
 
-void Cgi::cgiExecute(void) {
+int Cgi::cgiExecute(void) {
     pid_t   child;
     int     status;
     int     initial_1;
 
     if ((initial_1 = dup(1)) == -1) {
-        std::cerr << "Dup error\n" ; return ;
+        std::cerr << "Dup error\n" ; return (-1);
     }
     if (dup2(this->_fd, 1) == -1) {
-        std::cerr << "Dup2 error\n" ; return ;
+        std::cerr << "Dup2 error\n" ; return (-1);
     }
 
     // ------------------------------------------------------------------------ //
 
     if ((child = fork()) == 0) {
         if ((execve(this->_resp_location.getCgiPath().c_str(), NULL, this->_env)) == -1) {
-            std::cerr << "Execve error\n"; exit(1);
+            std::cerr << "Execve error\n"; return (-1);
         }
     }
     else if (child == -1) {
-        std::cerr << "Fork error\n" ; return ;
+        std::cerr << "Fork error\n" ; return (-1);
     }
     else {
         waitpid(child, &status, 0);
     }
     if (dup2(initial_1, 1) == -1) {
-        std::cerr << "Dup2 error\n" ; return ;
+        std::cerr << "Dup2 error\n" ; return (-1);
     }
 
     // ------------------------------------------------------------------------ //
 
+    return (0);
 };
 
 void Cgi::cgiClearEnv(void) {

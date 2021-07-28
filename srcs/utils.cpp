@@ -156,8 +156,8 @@ std::string ft_get_req_path_extension(Client & client) {
     return (ext);
 }
 
-void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd) {
+int ft_work_with_cgi(Client & client, Server & server, Location & location, int fd) {
     Cgi cgi(client, server, location, fd);
     
-    cgi.cgiInit();
+    return (cgi.cgiInit());
 }

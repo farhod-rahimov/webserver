@@ -12,10 +12,10 @@ class Cgi {
 
         Cgi & operator = (const Cgi & src);
 
-        void cgiInit();
+        int  cgiInit();
         void cgiCreateEnv(void);
         void cgiConvertEnv(void);
-        void cgiExecute(void);
+        int  cgiExecute(void);
         void cgiClearEnv(void);
 
     private:

@@ -7,8 +7,10 @@ void	ft_response_to_post(Client & client, Server & server, Location & location, 
 
     req_path_extension = ft_get_req_path_extension(client);
     if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
-        ft_work_with_cgi(client, server, location, fd);
-        ft_send_ok(client);
+        if (ft_work_with_cgi(client, server, location, fd) < 0)
+            ft_send_internal_error(client);
+        else
+            ft_send_204_not_content(client);
         return ;
     }
     ft_save_file(client, location);
