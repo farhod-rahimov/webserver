@@ -82,7 +82,7 @@ void	ft_response_to_get(Client & client, Server & server, Location & location, i
 void	ft_response_to_post(Client & client, Server & server, Location & location, int fd);
 
 // void	ft_response_to_delete(Client & client);
-void	ft_response_to_delete(Client & client, Server & server, Location & location, int fd);
+void	ft_response_to_delete(Client & client);
 
 void	ft_create_my_def_response(Client & client);
 
@@ -96,15 +96,17 @@ void	ft_parse(std::vector<Server> & servers, const char *conf_file);
 bool	ft_check_end_request(std::string & buf);
 
 void	ft_send_not_implemented(Client & client);
+void ft_send_204_not_content(Client & client);
 
 std::string ft_get_req_path_extension(Client & client);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
 
 void ft_send_too_long_body(Client & client, int fd, int k);
+void ft_send_internal_error(Client & client);
 
 void ft_send_ok(Client & client);
+void ft_send_forbidden(Client & client);
 void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
-
 
 void ft_create_new_write_event(int kq, int fd);
 
