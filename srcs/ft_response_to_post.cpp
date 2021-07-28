@@ -15,6 +15,7 @@ void	ft_response_to_post(Client & client, Server & server, Location & location, 
     }
     if (ft_save_file(client, location) < 0) {
         ft_send_internal_error(client);
+        std::cerr << "UPLOAD DIRECTORY IS WRONG\n";
         return ;
     }
     ft_send_file_was_created(client);
