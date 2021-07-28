@@ -1,6 +1,6 @@
 #include "./headers/Header.hpp"
 
-static void ft_save_file(Client & client, Location & location);
+static int ft_save_file(Client & client, Location & location);
 
 void	ft_response_to_post(Client & client, Server & server, Location & location, int fd) {
     std::string req_path_extension;
@@ -13,11 +13,14 @@ void	ft_response_to_post(Client & client, Server & server, Location & location, 
             ft_send_204_not_content(client);
         return ;
     }
-    ft_save_file(client, location);
+    if (ft_save_file(client, location) < 0) {
+        ft_send_internal_error(client);
+        return ;
+    }
     ft_send_file_was_created(client);
 }
 
-static void ft_save_file(Client & client, Location & location) {
+static int ft_save_file(Client & client, Location & location) {
     std::string     file_name;
     std::ofstream   ofs;
 
@@ -27,10 +30,14 @@ static void ft_save_file(Client & client, Location & location) {
             file_name.append("/");
     }
     file_name += client.ReqGetContentFileName();
-
+    errno = 0;
     ofs.open(file_name.c_str(), std::ios_base::trunc);
+    if (errno != 0) {
+        return (-1);
+    }
     if (ofs.is_open()) {
         ofs << client.ReqGetContent();
         ofs.close();
     }
+    return (0);
 }
