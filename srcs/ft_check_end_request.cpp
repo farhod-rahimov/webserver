@@ -45,7 +45,7 @@ static bool ft_check_body_end(std::string & buf, size_t first_dclrf) {
     }
     txt_len = buf.substr(con_len - len, len);
     con_len = std::atoi(txt_len.c_str());
-    std::cout << "TOTAL     " << con_len << std::endl;
+    std::cout << "TOTAL		BYTES TO RECEIVE    " << con_len << std::endl;
     if (con_len == ft_count_body_length(buf, first_dclrf))
         return (true);
     return (false);
@@ -54,7 +54,7 @@ static bool ft_check_body_end(std::string & buf, size_t first_dclrf) {
 static size_t ft_count_body_length(std::string & buf, size_t first_dclrf) {
     size_t len = buf.size() - first_dclrf;
     
-    std::cout << "RECEIVED  " << len << std::endl;
+    std::cout << "REMAINED	BYTES TO RECEIVE    " << len << std::endl;
     return (len);
 }
 
