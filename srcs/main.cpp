@@ -115,7 +115,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 		}
     }
 	if (evlist[i].filter == EVFILT_WRITE) {
-        ft_send_response(server, fd, chlist, servers, kq);
+        ft_send_response(server, fd, chlist, kq);
     }
 }
 

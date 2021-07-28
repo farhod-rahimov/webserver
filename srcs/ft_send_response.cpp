@@ -1,101 +1,68 @@
 #include "./headers/Header.hpp"
 
-void ft_send_not_implemented(Client & client) {
-	const char * content = "<html>\nError 501 Not Implemented.\nThe request cannot be carried out by the web server\n</html>";
-	
-	client.RespSetProtocol("HTTP/1.1");
-	client.RespSetStatusCode("501");
-	client.RespSetStatusTxt("NOT IMPLEMENTED");
-	client.RespSetConnection("Connection: keep-alive");
-	client.RespSetContentType("text/html; charset=utf-8");
-	client.RespSetContentLength(strlen(content));
-	client.RespSetContent(content);
-	
-	client.RespCreateFullRespTxt();	
-}
+static void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
+static void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path);
+static size_t ft_get_max_match(std::string & s1, std::string & s2);
+static void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root);
+static void ft_get_location_of_redirected_src(Location & responding_location, Client & client);
 
-void send_or_not() {
+static int ft_get_method(std::string & req_method, std::string & supported_methods);
+static int ft_check_protocol(std::string & req_protocol);
+static void ft_set_connection_header(Client & client);
 
-}
-
-void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers, int kq) {
-	int ret = 0;
-	size_t i = 0;
-	(void)ret;
-	(void)servers;
+void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, int kq) {
 	std::map<int, Client> & clients = server.getClients();
-	// ft_create_response(clients[fd], servers, server, fd);
-    
-	
+	int already_sent 				= clients[fd].RespGetFullRespTxt().length() - clients[fd].RespGetRemainedToSent();
+	int ret = 0; size_t i = 0;
 
-	int already_sent = clients[fd].RespGetFullRespTxt().length() - clients[fd].RespGetRemainedToSent();
-
-	if (clients[fd].RespGetRemainedToSent() > 0)
-		ret = send(fd, clients[fd].RespGetFullRespTxt().c_str() + already_sent, clients[fd].RespGetRemainedToSent(), 0);
-	
-	clients[fd].RespSetRemainedToSent(clients[fd].RespGetRemainedToSent() - ret);
-	std::cout << "																SENT BYTES " << ret << std::endl;
-	std::cout << "																REMAINED TO SENT " << clients[fd].RespGetRemainedToSent() << std::endl;
-	
-	if (clients[fd].RespGetRemainedToSent() <= 0) {
-		for (; chlist[i].ident != static_cast<unsigned int>(fd); i++) {}
-		struct kevent tmp;
-		EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
-		kevent(kq, &tmp, 1, NULL, 0, NULL);
-		// EV_SET(&chlist[i], fd, EVFILT_WRITE, EV_CLEAR, 0, 0, 0);
-		// EV_SET(&chlist[i], fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-		if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
-			size_t i = 0;
-			for (; i < chlist.size() && chlist[i].ident != fd; i++) {}
-			close(fd);
-			chlist.erase(chlist.begin() + i);
+	if (clients[fd].RespGetRemainedToSent() > 0) {
+		if ((ret = send(fd, clients[fd].RespGetFullRespTxt().c_str() + already_sent, clients[fd].RespGetRemainedToSent(), 0)) < 0) {
+			std::cerr << "Error. Cannot send response\n";
+			ft_send_internal_error(clients[fd]); return ;
 		}
 	}
-	// if (ret < 0) std::cout << "SEND ERROR\n"; else std::cout << "SEND OK\n";
-	// std::cout << "\nSENT\n'" << clients[fd].RespGetFullRespTxt() << "'\n";
-	
-}
-void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
-void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path);
-size_t ft_get_max_match(std::string & s1, std::string & s2);
-void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root);
-void ft_get_location_of_redirected_src(Location & responding_location, Client & client);
 
-int ft_get_method(std::string & req_method, std::string & supported_methods);
-int ft_check_protocol(std::string & req_protocol);
-void ft_set_connection_header(Client & client);
+	clients[fd].RespSetRemainedToSent(clients[fd].RespGetRemainedToSent() - ret);
+	std::cout << "TOTAL BYTES TO SEND		" << ret << std::endl;
+	std::cout << "REMAINED BYTES TO SENT	" << clients[fd].RespGetRemainedToSent() << std::endl;
+	
+	if (clients[fd].RespGetRemainedToSent() <= 0) {
+		struct kevent tmp; EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+		kevent(kq, &tmp, 1, NULL, 0, NULL);
+		if (clients[fd].RespGetConnection().find("close") != clients[fd].RespGetConnection().npos) {
+			for (i = 0; i < chlist.size() && chlist[i].ident != fd; i++) {}
+			close(fd); chlist.erase(chlist.begin() + i);
+		}
+	}
+}
 
 void ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server, int fd) {
-	int method;
 	Location responding_location;
-	(void)servers;
+	int method;
 	
 	ft_get_responding_server(servers, client, responding_server);
 	ft_get_responding_location(responding_server.getLocations(), responding_location, client.ReqGetPath());
+	
 	if (responding_location.getRedirection().empty())
 		ft_replace_req_path(client.ReqGetPath(), responding_location.getPath(), responding_location.getLocationRoot());
 	else
 		ft_get_location_of_redirected_src(responding_location, client);
+	
 	ft_set_connection_header(client);
 
-	// if (((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0) || ft_check_protocol(client.ReqGetProtocol()) < 0)
 	if ((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0)
 		return (ft_send_not_implemented(client));
 	if (ft_check_protocol(client.ReqGetProtocol()) < 0)
-		return (ft_send_not_implemented(client));
+		return (ft_send_protocol_not_supported(client));
 	
 	if (method == 1) {ft_response_to_get(client, responding_server, responding_location, fd);}
 	else if (method == 2) {ft_response_to_post(client, responding_server, responding_location, fd);}
 	else if (method == 3) {ft_response_to_delete(client);}
-	else ft_send_not_implemented(client);
-
-	// exit(1);
+	else ft_send_method_not_allowed(client);
 }
 
-void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server) {
-	
-	std::string req_server_host;
-	std::string req_server_port;
+static void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server) {
+	std::string req_server_host, req_server_port;
 
 	if (client.ReqGetHost().find(":") != client.ReqGetHost().npos) {
 		req_server_host = client.ReqGetHost().substr(0, client.ReqGetHost().find(":"));
@@ -114,31 +81,19 @@ void ft_get_responding_server(std::vector<Server> & servers, Client & client, Se
 			}
 		}
 	}
-	else {
-		for (size_t i = 0; i < servers.size(); i++) {
-			for (size_t n = 0; n < servers[i].getClients().size(); n++) {
-				if (&servers[i].getClients()[n] == &client) {
-					responding_server = servers[i];
-					break ;
-				}
+	for (size_t i = 0; i < servers.size(); i++) {
+		for (size_t n = 0; n < servers[i].getClients().size(); n++) {
+			if (&servers[i].getClients()[n] == &client) {
+				responding_server = servers[i];
+				return ;
 			}
 		}
 	}
-	// // std::cout << "req_host " << req_server_name << "\n";
-	// for (size_t i = 0; i < servers.size(); i++) {
-	// 	if (servers[i].getHost() == responding_server.getHost() && servers[i].getPort() == responding_server.getPort()) {
-	// 		if (servers[i].getServerName().find(req_server_name) != req_server_name.npos) {
-	// 			responding_server = servers[i];
-	// 		}
-	// 	}
-	// }
-	// std::cout << responding_server.getServerName();
 }
 
-void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path) {
+static void ft_get_responding_location(std::vector<Location> & locations, Location & responding_location, std::string & req_path) {
 	size_t max_match = ft_get_max_match(locations[0].getPath(), req_path);
-	size_t tmp;
-	size_t idx = 0;
+	size_t tmp, idx = 0;
 	
 	for (size_t i = 0; i < locations.size(); i++) {
 		tmp = max_match;
@@ -147,7 +102,6 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 			idx = i;
 		}
 	}
-	// std::cout << "MAX_MATCH " << max_match << "\n";
 	if (max_match == 0) {
 		for (size_t i = 0; i < locations.size(); i++) {
 			if (locations[i].getPath().length() == 1) {
@@ -159,45 +113,29 @@ void ft_get_responding_location(std::vector<Location> & locations, Location & re
 	responding_location = locations[idx];
 }
 
-void ft_get_location_of_redirected_src(Location & responding_location, Client & client) {
-	// std::string location;
-	// (void)client;
-	
-	// if (responding_location.getRedirection().back() == '/')
-	// 	responding_location.getRedirection().resize(responding_location.getRedirection().length() - 1);
-	// if (responding_location.getPath().back() == '/')
-		// responding_location.getPath().resize(responding_location.getPath().length() - 1);
-	// location = client.ReqGetPath();
-	// location.replace(0, responding_location.getPath().length(), responding_location.getRedirection());
-	// std::cout << "Location " << location << std::endl;
-
+static void ft_get_location_of_redirected_src(Location & responding_location, Client & client) {
 	if (responding_location.getRedirection().back() == '/')
 		responding_location.getRedirection().pop_back();
 	if (responding_location.getPath().back() == '/')
 		responding_location.getPath().pop_back();
+	
 	client.RespGetLocation() = client.ReqGetPath();
-	std::cout << "1Location " << client.RespGetLocation() << std::endl;
 	client.RespGetLocation().replace(0, responding_location.getPath().length(), responding_location.getRedirection());
-	std::cout << "2Location " << client.RespGetLocation() << std::endl;
 	client.RespSetLocation(client.RespGetLocation());
 };
 
-void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root) {
-	if (location_path.back() == '/') {
+static void ft_replace_req_path(std::string & req_path, std::string & location_path, std::string & location_root) {
+	if (location_path.back() == '/')
 		location_path.pop_back();
-	}
-	if (location_root.back() == '/') {
+	if (location_root.back() == '/')
 		location_root.pop_back();
-	}
 	req_path.replace(0, location_path.length(), location_root);
-	std::cout << "REQ NEW PATH " << req_path << std::endl;
 }
 
-size_t ft_get_max_match(std::string & s1, std::string & s2) {
+static size_t ft_get_max_match(std::string & s1, std::string & s2) {
 	size_t pos1 = 0, pos2 = 0, max = 0;
 	std::string tmp1, tmp2;
 
-	// std::cout << "THIS " << s1 << "\n";
 	for (; ;) {
 		if ((pos1 = s1.find("/", pos1)) == s1.npos)
 			return (max);
@@ -211,7 +149,7 @@ size_t ft_get_max_match(std::string & s1, std::string & s2) {
 	return (max);
 }
 
-int ft_get_method(std::string & req_method, std::string & supported_methods) {
+static int ft_get_method(std::string & req_method, std::string & supported_methods) {
 	if (req_method.find("GET") != req_method.npos && supported_methods.find("GET") != supported_methods.npos) {return (1);}
 	else if (req_method.find("POST") != req_method.npos && supported_methods.find("POST") != supported_methods.npos) {return (2);}
 	else if (req_method.find("DELETE") != req_method.npos && supported_methods.find("DELETE") != supported_methods.npos) {return (3);}
@@ -219,13 +157,13 @@ int ft_get_method(std::string & req_method, std::string & supported_methods) {
 	return (-1);
 }
 
-int ft_check_protocol(std::string & req_protocol) {
+static int ft_check_protocol(std::string & req_protocol) {
 	if (req_protocol.find("HTTP/1.1") == req_protocol.npos)
 		return (-1);
 	return (1);
 }
 
-void ft_set_connection_header(Client & client) {
+static void ft_set_connection_header(Client & client) {
 	size_t pos = client.ReqGetConnection().find("close");
 
 	if (pos != client.ReqGetConnection().npos)

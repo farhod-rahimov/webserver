@@ -202,6 +202,7 @@ std::string & Client::RespCreateFullRespTxt(void) {
     this->_resp_full_resp_txt.append(this->_resp_protocol); this->_resp_full_resp_txt.append(" ");
     this->_resp_full_resp_txt.append(this->_resp_status_code); this->_resp_full_resp_txt.append(" ");
     this->_resp_full_resp_txt.append(this->_resp_status_txt); this->_resp_full_resp_txt.append("\n");
+    this->_resp_full_resp_txt.append(this->_resp_connection); this->_resp_full_resp_txt.append("\n");
     if (this->_resp_location.length()) {
         this->_resp_full_resp_txt.append(this->_resp_location); this->_resp_full_resp_txt.append("\n");
     }

@@ -96,6 +96,48 @@ void ft_send_file_was_created(Client & client) {
 	client.RespCreateFullRespTxt();	
 }
 
+void ft_send_not_implemented(Client & client) {
+	const char * content = "<html>\nError 501 Not Implemented.\nThe request cannot be carried out by the web server\n</html>";
+	
+	client.RespSetProtocol("HTTP/1.1");
+	client.RespSetStatusCode("501");
+	client.RespSetStatusTxt("NOT IMPLEMENTED");
+	client.RespSetConnection("Connection: keep-alive");
+	client.RespSetContentType("text/html; charset=utf-8");
+	client.RespSetContentLength(strlen(content));
+	client.RespSetContent(content);
+	
+	client.RespCreateFullRespTxt();	
+}
+
+void ft_send_protocol_not_supported(Client & client) {
+	const char * content = "<html>\nError 505 HTTP Version Not Supported.\nThe request cannot be carried out by the web server\n</html>";
+	
+	client.RespSetProtocol("HTTP/1.1");
+	client.RespSetStatusCode("505");
+	client.RespSetStatusTxt("HTTP VERSION NOT SUPPORTED");
+	client.RespSetConnection("Connection: keep-alive");
+	client.RespSetContentType("text/html; charset=utf-8");
+	client.RespSetContentLength(strlen(content));
+	client.RespSetContent(content);
+	
+	client.RespCreateFullRespTxt();	
+}
+
+void ft_send_method_not_allowed(Client & client) {
+	const char * content = "<html>\nError 405 Method Not Allowed.\nThe request cannot be carried out by the web server\n</html>";
+	
+	client.RespSetProtocol("HTTP/1.1");
+	client.RespSetStatusCode("405");
+	client.RespSetStatusTxt("METHOD NOT ALLOWED");
+	client.RespSetConnection("Connection: keep-alive");
+	client.RespSetContentType("text/html; charset=utf-8");
+	client.RespSetContentLength(strlen(content));
+	client.RespSetContent(content);
+	
+	client.RespCreateFullRespTxt();	
+}
+
 // ------------------------------------------- //
 
 std::string ft_get_req_path_extension(Client & client) {

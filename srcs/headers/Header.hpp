@@ -66,7 +66,8 @@ bool	ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 void	ft_parse_request(std::map<int, Client> & clients, int fd);
 
-void    ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, std::vector<Server> & servers, int kq);
+void	ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & chlist, int kq);
+
 void    ft_create_response(Client & client, std::vector<Server> & servers, Server responding_server, int fd);
 
 void	ft_check_clients(int & i, std::vector<struct kevent> & chlist, \
@@ -98,6 +99,8 @@ bool	ft_check_end_request(std::string & buf);
 void	ft_send_not_implemented(Client & client);
 void ft_send_204_not_content(Client & client);
 void ft_send_file_was_created(Client & client);
+void ft_send_protocol_not_supported(Client & client);
+void ft_send_method_not_allowed(Client & client);
 
 std::string ft_get_req_path_extension(Client & client);
 void ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
@@ -110,7 +113,6 @@ int ft_show_current_dir_files(Client & client, Location & location, std::string 
 
 void ft_send_ok(Client & client);
 void ft_send_forbidden(Client & client);
-void ft_get_responding_server(std::vector<Server> & servers, Client & client, Server & responding_server);
 
 void ft_create_new_write_event(int kq, int fd);
 
