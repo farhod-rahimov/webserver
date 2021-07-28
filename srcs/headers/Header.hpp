@@ -103,6 +103,8 @@ void ft_work_with_cgi(Client & client, Server & server, Location & location, int
 
 void ft_send_too_long_body(Client & client, int fd, int k);
 void ft_send_internal_error(Client & client);
+int ft_show_current_dir_files(Client & client, Location & location, std::string & content);
+
 
 void ft_send_ok(Client & client);
 void ft_send_forbidden(Client & client);

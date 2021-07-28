@@ -1,24 +1,15 @@
 #include "./headers/Header.hpp"
 
-void ft_get_content_and_content_type(Client & client, Server & server, Location & location, std::string & content);
-void ft_get_content_type(std::string & content_type, std::string & extension);
-void ft_create_header(const char * content_type, Client & client, std::string & content);
-void ft_send_not_found(Client & client);
-
-int ft_show_current_dir_files(Client & client, Location & location, std::string & content);
+static void ft_get_content_and_content_type(Client & client, Server & server, Location & location, std::string & content);
+static void ft_get_content_type(std::string & content_type, std::string & extension);
 
 void ft_response_to_get(Client & client, Server & server, Location & location, int fd) {
-    std::string content, tmp;
+    std::string content, tmp, req_path_extension;
 
-    (void)fd;
-    
-    std::string req_path_extension;
     req_path_extension = ft_get_req_path_extension(client);
-    std::cout << req_path_extension;
     if (req_path_extension == location.getCgiExtension() && !location.getCgiExtension().empty()) {
         ft_work_with_cgi(client, server, location, fd);
-        ft_send_ok(client);
-    	std::cout << "																				ALKLKAMDCKLMADSKLCMDALKCMAKLDMC\n";
+        ft_send_204_not_content(client);
         return ;
     }
 
@@ -28,8 +19,6 @@ void ft_response_to_get(Client & client, Server & server, Location & location, i
         client.RespSetStatusTxt("MOVED");
         if (location.getRedirection().back() == '/')
             location.getRedirection().pop_back();
-
-        std::cout << client.RespCreateFullRespTxt();
         return ;
     }
     ft_get_content_and_content_type(client, server, location, content);
@@ -37,22 +26,23 @@ void ft_response_to_get(Client & client, Server & server, Location & location, i
 
 void ft_get_content_and_content_type(Client & client, Server & server, Location & location, std::string & content) {
     std::string content_type, extension, read_file = client.ReqGetPath();
-    size_t pos;
     std::string req_path = client.ReqGetPath();
     std::string location_root = location.getLocationRoot();
+    std::string status_code;
+    size_t pos;
 
     if (req_path.back() != '/') {req_path.append("/");}
     if (location_root.back() != '/') {location_root.append("/");}
 
-    std::string status_code;
-
     if (!ft_read_file(read_file.c_str(), content)) {
         read_file = server.getDefaultErrorPagePath();
-        if (errno == EISDIR && req_path == location_root) { // is directory
+        
+        if (errno == EISDIR && req_path == location_root) {         // EISDIR -> is directory
             read_file = location.getDefaultFile();
+            
             if (!ft_read_file(read_file.c_str(), content)) {
                 read_file = server.getDefaultErrorPagePath();
-
+                
                 if (location.getAutoindex().find("on") != location.getAutoindex().npos) {
                     if (ft_show_current_dir_files(client, location, content) == -1) {
                         ft_send_not_found(client); return ;
@@ -74,30 +64,21 @@ void ft_get_content_and_content_type(Client & client, Server & server, Location 
             ft_send_not_found(client); return ;
         }
     }
-    if ((pos =read_file.find_last_of(".")) != read_file.npos) {
-        extension =  read_file.substr(++pos);
-        // std::cout << "extension = " << extension << std::endl;
+    if ((pos = read_file.find_last_of(".")) != read_file.npos) {
+        extension = read_file.substr(++pos);
         ft_get_content_type(content_type, extension);
     }
-    // std::cout << content << "\n"; exit(1);
     ft_create_header(content_type.c_str(), client, content);
-    // std::cout << content.length() << " " << content.size() << " SJANCXKJASNCKJASNCKASJCNAJKSCNJKS\n"; exit(1);
     if (status_code.length())
         client.RespGetStatusCode() = status_code;
 }
 
 void ft_get_content_type(std::string & content_type, std::string & extension) {
-    const char * application_extensions [] = { "epub", "js", "json", "jar", "doc", "pdf", "xml", "docx", \
-                                               "rar", "zip", "tar", NULL};
-    
-    const char * audio_extensions [] = { "mp3", "mp4a", "mpga", "wma", "wax", "wav", NULL};
-    
-    const char * image_extensions [] = { "bmp", "jpg", "jpeg", "gif", "png", "xpm", "ico", NULL};
-    
-    const char * text_extensions [] = { "html", "css", "csv", "txt", "rtx", "yaml", "bmp", NULL};
-    
-    // const char * video_extensions [] = { "3gp", "mp4", "mpeg", "avi", "movie", NULL};
-
+    const char * application_extensions [] = { "epub", "js", "json", "jar", "doc", "pdf", "xml", "docx", "rar", "zip", "tar", NULL};
+    const char * audio_extensions       [] = { "mp3", "mp4a", "mpga", "wma", "wax", "wav", NULL};
+    const char * image_extensions       [] = { "bmp", "jpg", "jpeg", "gif", "png", "xpm", "ico", NULL};
+    const char * text_extensions        [] = { "html", "css", "csv", "txt", "rtx", "yaml", "bmp", NULL};
+    const char * video_extensions       [] = { "3gp", "mp4", "mpeg", "avi", "movie", NULL};
     size_t i;
 
     content_type = "application/";
@@ -120,59 +101,17 @@ void ft_get_content_type(std::string & content_type, std::string & extension) {
                     extension.compare(text_extensions[i]) != 0; i++) {}
 
                 if (text_extensions[i] == NULL) {
-                    // content_type = "video/";
-                    // for (i = 0; video_extensions[i] != NULL && \
-                    //     extension.compare(video_extensions[i]) != 0; i++) {}
+                    content_type = "video/";
+                    for (i = 0; video_extensions[i] != NULL && \
+                        extension.compare(video_extensions[i]) != 0; i++) {}
                     
-                    // if (video_extensions[i] == NULL) {
+                    if (video_extensions[i] == NULL) {
                         content_type = "application/octet-stream";
                         return ;
-                    // }
+                    }
                 }
             }
         }
     }
     content_type += extension;
-}
-
-void ft_create_header(const char * content_type, Client & client, std::string & content) {
-
-    client.RespSetProtocol("HTTP/1.1");
-	client.RespSetStatusCode("200");
-	client.RespSetStatusTxt("OK");
-	client.RespSetContentType(content_type);
-	client.RespSetContentLength(content.length());
-	client.RespSetContent(content);
-	
-	client.RespCreateFullRespTxt();
-}
-
-void ft_send_not_found(Client & client) {
-	const char * content = "<html>\nError 404 Not Found.\nThe request cannot be carried out by the web server\n</html>";
-	
-	client.RespSetStatusCode("404");
-	client.RespSetStatusTxt("NOT FOUND");
-	client.RespSetContentType("text/html");
-	client.RespSetContentLength(strlen(content));
-	client.RespSetContent(content);
-	
-	client.RespCreateFullRespTxt();	
-}
-
-void ft_send_too_long_body(Client & client, int fd, int kq) {
-	const char * content = "<html>\nError 413 Request Entity Too Large.\nThe request cannot be carried out by the web server\n</html>";
-	
-	client.RespSetStatusCode("413");
-	client.RespSetStatusTxt("Request Entity Too Large");
-	client.RespSetContentType("text/html");
-	client.RespSetContentLength(strlen(content));
-	client.RespSetContent(content);
-	
-	client.RespCreateFullRespTxt();
-
-    send(fd, client.RespGetFullRespTxt().c_str(), client.RespGetRemainedToSent(), 0);
-
-    struct kevent tmp;
-    EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
-    kevent(kq, &tmp, 1, NULL, 0, NULL);
 }
