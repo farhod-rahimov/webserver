@@ -48,7 +48,7 @@ void ft_send_not_found(Client & client) {
 	client.RespCreateFullRespTxt();	
 }
 
-void ft_send_too_long_body(Client & client, int fd, int kq) {
+void ft_send_too_long_body(Client & client) {
 	const char * content = "<html>\nError 413 Request Entity Too Large.\nThe request cannot be carried out by the web server\n</html>";
 	
 	client.RespSetStatusCode("413");
@@ -58,12 +58,6 @@ void ft_send_too_long_body(Client & client, int fd, int kq) {
 	client.RespSetContent(content);
 	
 	client.RespCreateFullRespTxt();
-
-    send(fd, client.RespGetFullRespTxt().c_str(), client.RespGetRemainedToSent(), 0);
-
-    struct kevent tmp;
-    EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
-    kevent(kq, &tmp, 1, NULL, 0, NULL);
 }
 
 void ft_create_header(const char * content_type, Client & client, std::string & content) {
@@ -154,4 +148,16 @@ int ft_work_with_cgi(Client & client, Server & server, Location & location, int 
     Cgi cgi(client, server, location, fd);
     
     return (cgi.cgiInit());
+}
+
+void ft_remove_client(std::vector<struct kevent> & chlist, int fd) {
+	size_t i = 0;
+	for (; i < chlist.size(); i++) {
+		if (chlist[i].ident == static_cast<size_t>(fd)) {
+			std::cout << "THE CONNECTION WITH CLIENT " << fd << " WAS CLOSED\n";
+			break ;
+		}
+	}
+	close(chlist[i].ident);
+	chlist.erase(chlist.begin() + i);
 }

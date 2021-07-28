@@ -80,10 +80,16 @@ bool ft_check_new_connection(int & socket_fd, int & i, std::vector<struct kevent
 	
 	if (evlist[i].ident == static_cast<unsigned int>(socket_fd)) {
 		int accept_fd = accept(socket_fd, (struct sockaddr *)&client, &client_size);
-		if (accept_fd < 0) std::cerr << "ACCEPT	ERROR\n"; else std::cout << "ACCEPT	OK\n";
+		if (accept_fd < 0) {
+			std::cerr << "ACCEPT	ERROR\n";
+			return (false);
+		}
+		else std::cout << "ACCEPT	OK\n";
 
 		if (fcntl(accept_fd, F_SETFL, O_NONBLOCK) < 0) {
-			std::cerr << "FCNTL (ft_check_new_connection)	ERROR\n"; exit(EXIT_FAILURE);
+			std::cerr << "FCNTL (ft_check_new_connection)	ERROR\n";
+			close(accept_fd);
+			return (false);
 		}
 		// else std::cout << "FCNTL (ft_check_new_connection)	OK\n";
 
@@ -107,10 +113,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 		bzero(buf, BUFFER_SIZE + 1);
 		if ((ret = recv(fd, &buf, BUFFER_SIZE, 0)) < 0) {
 			std::cerr << "RECV	ERROR";
-			ft_send_internal_error(clients[fd]);
-			if ((ret = send(fd, clients[fd].RespGetFullRespTxt().c_str(), clients[fd].RespGetRemainedToSent(), 0)) < 0) {
-				std::cerr << "Error. Cannot send response\n";
-			}
+			ft_remove_client(chlist, fd);
 			return ;
 		}
 		buf[ret] = '\0';
@@ -122,7 +125,7 @@ void ft_check_clients(int & i, std::vector<struct kevent> & chlist, std::vector<
 	        ft_parse_request(clients, fd);
 			
 			if (clients[fd].ReqGetContentLength() > static_cast<size_t>(std::atoi(server.getLimitBodySize().c_str()))) {
-				ft_send_too_long_body(clients[fd], fd, kq);
+				ft_send_too_long_body(clients[fd]);
 			}
 			else {
 				ft_create_response(clients[fd], servers, server, fd);
@@ -145,7 +148,6 @@ void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 
 	for (i = 0; i < nev; i++) {
 		if (evlist[i].flags & EV_ERROR) {
-			// std::cerr << "EV_ERROR\n";
 			continue ;
 		}
 		if (ft_check_new_connection(socket_fd, i, chlist, evlist, clients) == true) {
@@ -158,7 +160,6 @@ void ft_check_fds(int & nev, int & socket_fd, std::vector<struct kevent> & chlis
 			if (!(evlist[i].flags & EV_ERROR)) {
 				ft_check_clients(i, chlist, evlist, server);
 			}
-			// else {std::cerr << "EV_ERROR\n";}
 		}
 		if (it == clients.end() && ++i < nev) it = clients.begin();
 		else if (it == clients.end()) break ;

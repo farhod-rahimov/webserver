@@ -62,13 +62,13 @@ void 		ft_send_method_not_allowed(Client & client);
 std::string ft_get_req_path_extension(Client & client);
 int 		ft_work_with_cgi(Client & client, Server & server, Location & location, int fd);
 std::string ft_get_req_path_extension(Client & client);
-void 		ft_send_too_long_body(Client & client, int fd, int k);
+void 		ft_send_too_long_body(Client & client);
 void 		ft_send_internal_error(Client & client);
 int 		ft_show_current_dir_files(Client & client, Location & location, std::string & content);
 void 		ft_send_forbidden(Client & client);
 void 		ft_create_new_write_event(int kq, int fd);
+void		ft_remove_client(std::vector<struct kevent> & chlist, int fd);
 
-/////trash.cpp
-void ft_print_result(std::vector<Server> & servers);
+void		ft_print_result(std::vector<Server> & servers);
 
 #endif

@@ -18,7 +18,10 @@ void ft_send_response(Server & server, size_t fd, std::vector<struct kevent> & c
 	if (clients[fd].RespGetRemainedToSent() > 0) {
 		if ((ret = send(fd, clients[fd].RespGetFullRespTxt().c_str() + already_sent, clients[fd].RespGetRemainedToSent(), 0)) < 0) {
 			std::cerr << "Error. Cannot send response\n";
-			ft_send_internal_error(clients[fd]); return ;
+			struct kevent tmp; EV_SET(&tmp, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+			kevent(kq, &tmp, 1, NULL, 0, NULL);
+			ft_remove_client(chlist, fd);
+			return ;
 		}
 	}
 
@@ -51,7 +54,7 @@ void ft_create_response(Client & client, std::vector<Server> & servers, Server r
 	ft_set_connection_header(client);
 
 	if ((method = ft_get_method(client.ReqGetMethod(), responding_location.getAllowedMethods())) < 0)
-		return (ft_send_not_implemented(client));
+		return (ft_send_method_not_allowed(client));
 	if (ft_check_protocol(client.ReqGetProtocol()) < 0)
 		return (ft_send_protocol_not_supported(client));
 	
