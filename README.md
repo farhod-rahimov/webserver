@@ -6,4 +6,4 @@ FIRST edit ``default_works.conf`` - webserver config (edit the paths)
 
 BUILD webserver ``make``
 
-LAUNCH webserver ``go to https://localhost:port_from_default_works.conf``
+LAUNCH webserver ``./server`` and ``go to https://localhost:port_from_default_works.conf``
